@@ -53,6 +53,20 @@ export interface VideoDirection {
 }
 
 export type SongStatus = 'brouillon' | 'en_cours' | 'complete' | 'publiee';
+export type AudioStatus = 'non_genere' | 'en_cours' | 'termine' | 'erreur';
+
+export interface AudioData {
+  audio_statut: AudioStatus;
+  audio_url?: string;
+  audio_format?: string;
+  audio_duree_secondes?: number;
+  audio_date_generation?: string;
+  audio_prompt_utilise?: string;
+  audio_version?: string;
+  audio_est_instrumental?: boolean;
+  audio_message_erreur?: string;
+  audio_service_utilise?: string;
+}
 
 export interface Song {
   id: number;
@@ -72,6 +86,10 @@ export interface Song {
   direction_audio?: AudioDirection;
   direction_video?: VideoDirection;
   paroles?: SongLyrics;
+  
+  audio?: AudioData;
+  audio_instrumental?: AudioData;
+  audio_courte?: AudioData;
   
   image?: string;
   freq?: number[];
