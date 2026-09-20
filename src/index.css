@@ -208,3 +208,39 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-radius: 2px;
   animation: visualizerBar ease-in-out infinite;
 }
+
+/* Lyrics karaoke effect */
+.lyrics-active {
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 0 40px rgba(168, 85, 247, 0.5);
+}
+
+/* Voice indicator */
+.voice-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.voice-wave span {
+  display: inline-block;
+  width: 3px;
+  background: linear-gradient(to top, #6366f1, #a855f7);
+  border-radius: 2px;
+  animation: voiceWave 0.5s ease-in-out infinite alternate;
+}
+
+.voice-wave span:nth-child(1) { animation-delay: 0s; height: 8px; }
+.voice-wave span:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+.voice-wave span:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+.voice-wave span:nth-child(4) { animation-delay: 0.3s; height: 16px; }
+.voice-wave span:nth-child(5) { animation-delay: 0.4s; height: 12px; }
+
+@keyframes voiceWave {
+  0% { transform: scaleY(0.5); }
+  100% { transform: scaleY(1.5); }
+}
+
+/* Artist section glow */
+.artist-glow {
+  box-shadow: 0 0 60px rgba(99, 102, 241, 0.3), 0 0 100px rgba(168, 85, 247, 0.2);
+}

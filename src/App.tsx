@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// ============ DATA ============
+// ============ DATA WITH LYRICS ============
 const songs = [
   {
     id: 1,
@@ -13,7 +13,30 @@ const songs = [
     likes: 2847,
     streams: "125K",
     image: "https://image.qwenlm.ai/generated-images/f8178be0-14bf-44ad-8cc9-91d99be2dc72/_result.png",
-    freq: [262, 330, 392, 523]
+    freq: [262, 330, 392, 523, 392, 330, 262, 330],
+    lyrics: [
+      { time: 0, text: "🎵 Étoiles du Soir 🎵" },
+      { time: 5, text: "Dans le ciel immense et noir" },
+      { time: 10, text: "Je cherche encore ton regard" },
+      { time: 15, text: "Perdu dans mes souvenirs" },
+      { time: 20, text: "" },
+      { time: 22, text: "Les étoiles brillent ce soir" },
+      { time: 27, text: "Comme des promesses d'espoir" },
+      { time: 32, text: "Je danse sous leur lumière" },
+      { time: 37, text: "Guidé par ton souvenir" },
+      { time: 42, text: "" },
+      { time: 44, text: "🎶 Étoiles du soir, éclairez mon chemin" },
+      { time: 49, text: "Guidez-moi vers demain" },
+      { time: 54, text: "Dans vos reflets argentés" },
+      { time: 59, text: "Je vois ton visage aimé" },
+      { time: 64, text: "" },
+      { time: 66, text: "Les nuits sont longues sans toi" },
+      { time: 71, text: "Mais les étoiles veillent sur moi" },
+      { time: 76, text: "Elles chantent ta mélodie" },
+      { time: 81, text: "Dans mon cœur à l'infini" },
+      { time: 86, text: "" },
+      { time: 88, text: "🎵 Étoiles du Soir 🎵" }
+    ]
   },
   {
     id: 2,
@@ -26,7 +49,30 @@ const songs = [
     likes: 3291,
     streams: "189K",
     image: "https://image.qwenlm.ai/generated-images/4acd8f55-54b9-43ec-b088-76fd086f65de/_result.png",
-    freq: [294, 370, 440, 587]
+    freq: [294, 370, 440, 587, 440, 370, 294, 370],
+    lyrics: [
+      { time: 0, text: "🎵 Danse sous la Pluie 🎵" },
+      { time: 5, text: "Les gouttes tombent sur la ville" },
+      { time: 10, text: "Je me sens libre et agile" },
+      { time: 15, text: "Plus besoin de réfléchir" },
+      { time: 20, text: "" },
+      { time: 22, text: "Je danse sous la pluie" },
+      { time: 27, text: "Oubliant tous mes soucis" },
+      { time: 32, text: "Chaque goutte est un instant" },
+      { time: 37, text: "De bonheur et de vivant" },
+      { time: 42, text: "" },
+      { time: 44, text: "🎶 Tourne, tourne, ne t'arrête pas" },
+      { time: 49, text: "La pluie lave tes peines" },
+      { time: 54, text: "Laisse-toi emporter" },
+      { time: 59, text: "Par cette douce mélodie" },
+      { time: 64, text: "" },
+      { time: 66, text: "Les flaques reflètent le ciel" },
+      { time: 71, text: "Je suis libre comme l'hirondelle" },
+      { time: 76, text: "Rien ne peut m'arrêter" },
+      { time: 81, text: "Je danse, je vis, j'aime" },
+      { time: 86, text: "" },
+      { time: 88, text: "🎵 Danse sous la Pluie 🎵" }
+    ]
   },
   {
     id: 3,
@@ -39,7 +85,31 @@ const songs = [
     likes: 4512,
     streams: "234K",
     image: "https://image.qwenlm.ai/generated-images/3e82b461-f64c-4da8-86d0-a6cb4b256d34/_result.png",
-    freq: [220, 277, 330, 440]
+    freq: [220, 277, 330, 440, 330, 277, 220, 277],
+    lyrics: [
+      { time: 0, text: "🎵 Cœur de Verre 🎵" },
+      { time: 5, text: "Mon cœur est fragile comme du verre" },
+      { time: 10, text: "Transparent mais plein de mystère" },
+      { time: 15, text: "Je le protège avec soin" },
+      { time: 20, text: "De peur qu'il ne se brise" },
+      { time: 25, text: "" },
+      { time: 27, text: "Chaque battement est précieux" },
+      { time: 32, text: "Chaque amour est un adieu" },
+      { time: 37, text: "Mais je continue d'aimer" },
+      { time: 42, text: "Même si ça fait mal" },
+      { time: 47, text: "" },
+      { time: 49, text: "🎶 Cœur de verre, cœur fragile" },
+      { time: 54, text: "Tu brilles mais tu trembles" },
+      { time: 59, text: "Dans ce monde trop cruel" },
+      { time: 64, text: "Tu cherches la tendresse" },
+      { time: 69, text: "" },
+      { time: 71, text: "Un jour quelqu'un comprendra" },
+      { time: 76, text: "Que ton cœur vaut de l'or" },
+      { time: 81, text: "Et te protégera" },
+      { time: 86, text: "De toutes ses forces" },
+      { time: 91, text: "" },
+      { time: 93, text: "🎵 Cœur de Verre 🎵" }
+    ]
   },
   {
     id: 4,
@@ -52,7 +122,31 @@ const songs = [
     likes: 1987,
     streams: "98K",
     image: "https://image.qwenlm.ai/generated-images/aeb30523-956c-41d6-861d-1b310f3f9a5c/_result.png",
-    freq: [196, 247, 294, 392]
+    freq: [196, 247, 294, 392, 294, 247, 196, 247],
+    lyrics: [
+      { time: 0, text: "🎵 Voyage Intérieur 🎵" },
+      { time: 5, text: "Je ferme les yeux et je pars" },
+      { time: 10, text: "Dans les profondeurs de mon âme" },
+      { time: 15, text: "Un voyage sans carte ni plan" },
+      { time: 20, text: "Vers les territoires inconnus" },
+      { time: 25, text: "" },
+      { time: 27, text: "Je découvre des paysages" },
+      { time: 32, text: "Que je croyais oubliés" },
+      { time: 37, text: "Des souvenirs enfouis" },
+      { time: 42, text: "Qui refont surface doucement" },
+      { time: 47, text: "" },
+      { time: 49, text: "🎶 Voyage intérieur, voyage sans fin" },
+      { time: 54, text: "Je me perds pour me retrouver" },
+      { time: 59, text: "Dans les méandres de mon être" },
+      { time: 64, text: "Je cherche ma vérité" },
+      { time: 69, text: "" },
+      { time: 71, text: "Chaque pas est une découverte" },
+      { time: 76, text: "Chaque silence une réponse" },
+      { time: 81, text: "Je suis le voyageur" },
+      { time: 86, text: "De ma propre existence" },
+      { time: 91, text: "" },
+      { time: 93, text: "🎵 Voyage Intérieur 🎵" }
+    ]
   },
   {
     id: 5,
@@ -65,7 +159,31 @@ const songs = [
     likes: 5623,
     streams: "312K",
     image: "https://image.qwenlm.ai/generated-images/a77a9fe2-f78f-4b3b-99e8-07d66697396b/_result.png",
-    freq: [330, 415, 494, 659]
+    freq: [330, 415, 494, 659, 494, 415, 330, 415],
+    lyrics: [
+      { time: 0, text: "🎵 Nuit Électrique 🎵" },
+      { time: 5, text: "Les néons s'allument dans la nuit" },
+      { time: 10, text: "L'énergie circule sans répit" },
+      { time: 15, text: "Les basses vibrent dans mon corps" },
+      { time: 20, text: "Je suis connecté, je suis fort" },
+      { time: 25, text: "" },
+      { time: 27, text: "La ville pulse à l'unisson" },
+      { time: 32, text: "Avec mon cœur en fusion" },
+      { time: 37, text: "Chaque beat est une étincelle" },
+      { time: 42, text: "Qui illumine la nuit éternelle" },
+      { time: 47, text: "" },
+      { time: 49, text: "🎶 Nuit électrique, nuit magique" },
+      { time: 54, text: "On danse jusqu'à l'aube" },
+      { time: 59, text: "L'énergie nous porte" },
+      { time: 64, text: "Vers l'infini et au-delà" },
+      { time: 69, text: "" },
+      { time: 71, text: "Les lumières dansent autour" },
+      { time: 76, text: "Dans un ballet sans retour" },
+      { time: 81, text: "Cette nuit est à nous" },
+      { time: 86, text: "Électrique et fou" },
+      { time: 91, text: "" },
+      { time: 93, text: "🎵 Nuit Électrique 🎵" }
+    ]
   },
   {
     id: 6,
@@ -78,7 +196,31 @@ const songs = [
     likes: 2156,
     streams: "145K",
     image: "https://image.qwenlm.ai/generated-images/f47dc457-125c-4524-ab14-bcc1e7caf18d/_result.png",
-    freq: [247, 311, 370, 494]
+    freq: [247, 311, 370, 494, 370, 311, 247, 311],
+    lyrics: [
+      { time: 0, text: "🎵 Jardin Secret 🎵" },
+      { time: 5, text: "Dans un coin de mon cœur" },
+      { time: 10, text: "Fleurit un jardin secret" },
+      { time: 15, text: "Où poussent des fleurs rares" },
+      { time: 20, text: "Que personne ne connaît" },
+      { time: 25, text: "" },
+      { time: 27, text: "Des pensées délicates" },
+      { time: 32, text: "Des rêves fragiles" },
+      { time: 37, text: "Qui n'éclosent qu'au calme" },
+      { time: 42, text: "Des moments tranquilles" },
+      { time: 47, text: "" },
+      { time: 49, text: "🎶 Jardin secret, jardin magique" },
+      { time: 54, text: "Tu es mon refuge" },
+      { time: 59, text: "Quand le monde est trop bruyant" },
+      { time: 64, text: "Je me perds dans tes allées" },
+      { time: 69, text: "" },
+      { time: 71, text: "Chaque fleur raconte une histoire" },
+      { time: 76, text: "Chaque parfum un souvenir" },
+      { time: 81, text: "Dans ce jardin intérieur" },
+      { time: 86, text: "Je me laisse fleurir" },
+      { time: 91, text: "" },
+      { time: 93, text: "🎵 Jardin Secret 🎵" }
+    ]
   }
 ];
 
@@ -108,7 +250,7 @@ const socials = [
   { name: "Facebook", followers: "15.8K", icon: "fab fa-facebook", gradient: "from-blue-600 to-blue-400", url: "#" }
 ];
 
-// ============ AUDIO SYNTHESIZER ============
+// ============ AUDIO SYNTHESIZER WITH VOICE ============
 class AudioSynth {
   private ctx: AudioContext | null = null;
   private oscillators: OscillatorNode[] = [];
@@ -116,6 +258,7 @@ class AudioSynth {
   private isPlaying = false;
   private intervalId: number | null = null;
   private noteIndex = 0;
+  private voice: SpeechSynthesisUtterance | null = null;
 
   init() {
     if (!this.ctx) {
@@ -160,6 +303,46 @@ class AudioSynth {
     };
   }
 
+  singLyrics(lyrics: { time: number; text: string }[], onLyricChange: (index: number) => void) {
+    if (!('speechSynthesis' in window)) return;
+    
+    let currentLyricIndex = 0;
+    
+    const speakNext = () => {
+      if (!this.isPlaying || currentLyricIndex >= lyrics.length) return;
+      
+      const lyric = lyrics[currentLyricIndex];
+      if (lyric.text) {
+        onLyricChange(currentLyricIndex);
+        
+        this.voice = new SpeechSynthesisUtterance(lyric.text);
+        this.voice.lang = 'fr-FR';
+        this.voice.rate = 0.9;
+        this.voice.pitch = 1.2;
+        this.voice.volume = 0.8;
+        
+        // Try to find a French voice
+        const voices = speechSynthesis.getVoices();
+        const frenchVoice = voices.find(v => v.lang.startsWith('fr'));
+        if (frenchVoice) {
+          this.voice.voice = frenchVoice;
+        }
+        
+        this.voice.onend = () => {
+          currentLyricIndex++;
+          setTimeout(speakNext, 1000);
+        };
+        
+        speechSynthesis.speak(this.voice);
+      } else {
+        currentLyricIndex++;
+        setTimeout(speakNext, 1000);
+      }
+    };
+    
+    speakNext();
+  }
+
   stop() {
     this.isPlaying = false;
     if (this.intervalId) {
@@ -168,6 +351,11 @@ class AudioSynth {
     }
     this.oscillators.forEach(o => { try { o.stop(); } catch(e) {} });
     this.oscillators = [];
+    
+    // Stop voice
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
   }
 
   getIsPlaying() { return this.isPlaying; }
@@ -239,6 +427,7 @@ function Navbar({ onFollowClick, onSupportClick, activeSection, mobileMenuOpen, 
     { id: 'accueil', label: 'Accueil' },
     { id: 'chansons', label: '🎵 Chansons' },
     { id: 'videos', label: '🎬 Vidéos' },
+    { id: 'artiste', label: '🎤 Artiste' },
     { id: 'ecouter', label: '🎧 Écouter' },
     { id: 'supporter', label: '💎 Supporter' },
     { id: 'apropos', label: 'À propos' }
@@ -316,7 +505,7 @@ function HeroSection() {
           Mes Chansons
         </h1>
         <p className="text-xl md:text-2xl text-gray-300 mb-4">
-          Musique originale disponible sur toutes les plateformes
+          Musique originale avec paroles disponibles sur toutes les plateformes
         </p>
         <p className="text-sm md:text-base text-gray-400 mb-8">
           Spotify • Apple Music • YouTube • Deezer • Amazon • Tidal
@@ -326,8 +515,8 @@ function HeroSection() {
           <a href="#chansons" className="px-8 py-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold hover:opacity-90 transition animate-pulse-glow">
             🎵 Écouter maintenant
           </a>
-          <a href="#ecouter" className="px-8 py-3 rounded-full border border-white/20 text-white font-semibold hover:bg-white/10 transition">
-            🎧 Toutes les plateformes
+          <a href="#artiste" className="px-8 py-3 rounded-full border border-white/20 text-white font-semibold hover:bg-white/10 transition">
+            🎤 Voir l'artiste
           </a>
           <a href="#supporter" className="px-8 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:opacity-90 transition">
             💎 Me soutenir
@@ -352,7 +541,7 @@ function HeroSection() {
   );
 }
 
-function SongCard({ song, isPlaying, isCurrentSong, onPlay, onLike, liked, onShare }: {
+function SongCard({ song, isPlaying, isCurrentSong, onPlay, onLike, liked, onShare, onShowLyrics }: {
   song: typeof songs[0];
   isPlaying: boolean;
   isCurrentSong: boolean;
@@ -360,6 +549,7 @@ function SongCard({ song, isPlaying, isCurrentSong, onPlay, onLike, liked, onSha
   onLike: () => void;
   liked: boolean;
   onShare: () => void;
+  onShowLyrics: () => void;
 }) {
   return (
     <div className="glass rounded-2xl overflow-hidden card-hover group">
@@ -395,6 +585,9 @@ function SongCard({ song, isPlaying, isCurrentSong, onPlay, onLike, liked, onSha
             <span><i className="fas fa-heart mr-1 text-red-400"></i>{liked ? song.likes + 1 : song.likes}</span>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={onShowLyrics} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-indigo-400 transition" title="Voir les paroles">
+              <i className="fas fa-align-left"></i>
+            </button>
             <button onClick={onLike} className={`w-8 h-8 rounded-full flex items-center justify-center transition ${liked ? 'text-red-500 animate-heartbeat' : 'text-gray-400 hover:text-red-400'}`}>
               <i className={`fas fa-heart`}></i>
             </button>
@@ -408,13 +601,14 @@ function SongCard({ song, isPlaying, isCurrentSong, onPlay, onLike, liked, onSha
   );
 }
 
-function SongsSection({ currentSong, isPlaying, onPlay, likedSongs, onLike, onShare }: {
+function SongsSection({ currentSong, isPlaying, onPlay, likedSongs, onLike, onShare, onShowLyrics }: {
   currentSong: number | null;
   isPlaying: boolean;
   onPlay: (id: number) => void;
   likedSongs: Set<number>;
   onLike: (id: number) => void;
   onShare: (song: typeof songs[0]) => void;
+  onShowLyrics: (song: typeof songs[0]) => void;
 }) {
   return (
     <section id="chansons" className="py-20 px-4">
@@ -422,7 +616,7 @@ function SongsSection({ currentSong, isPlaying, onPlay, likedSongs, onLike, onSh
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 gradient-text font-[Playfair_Display]">
           🎵 Mes Chansons
         </h2>
-        <p className="text-center text-gray-400 mb-12">Découvrez mes créations musicales originales</p>
+        <p className="text-center text-gray-400 mb-12">Découvrez mes créations musicales avec paroles</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {songs.map(song => (
@@ -435,8 +629,105 @@ function SongsSection({ currentSong, isPlaying, onPlay, likedSongs, onLike, onSh
               onLike={() => onLike(song.id)}
               liked={likedSongs.has(song.id)}
               onShare={() => onShare(song)}
+              onShowLyrics={() => onShowLyrics(song)}
             />
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ArtistSection({ isPlaying, currentSong }: { isPlaying: boolean; currentSong: typeof songs[0] | null }) {
+  return (
+    <section id="artiste" className="py-20 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 gradient-text font-[Playfair_Display]">
+          🎤 L'Artiste
+        </h2>
+        <p className="text-center text-gray-400 mb-12">Découvrez la voix derrière les chansons</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Artist Image/Video */}
+          <div className="relative">
+            <div className="relative aspect-square rounded-2xl overflow-hidden glass artist-glow">
+              <img
+                src="https://image.qwenlm.ai/generated-images/1184f475-3233-4eba-a5f1-4f434fa6d2b8/_result.png"
+                alt="Artiste"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+              
+              {isPlaying && currentSong && (
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="voice-wave">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <span className="text-red-400 text-sm font-semibold">🎤 L'artiste chante</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">{currentSong.title}</h3>
+                  <p className="text-gray-300 text-sm mt-1">
+                    <i className="fas fa-microphone-alt mr-1 text-indigo-400"></i>
+                    Interprété en direct
+                  </p>
+                </div>
+              )}
+              
+              {!isPlaying && (
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">🎤 Artiste Interprète</h3>
+                  <p className="text-gray-300 text-sm">Cliquez sur une chanson pour entendre la voix</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 blur-xl"></div>
+            <div className="absolute -bottom-4 -left-4 w-32 h-32 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 opacity-20 blur-xl"></div>
+          </div>
+
+          {/* Artist Info */}
+          <div>
+            <h3 className="text-3xl font-bold text-white mb-4 font-[Playfair_Display]">
+              Une voix, une âme, des émotions
+            </h3>
+            <p className="text-gray-300 text-lg leading-relaxed mb-6">
+              Passionné de musique depuis toujours, je mets mon cœur et mon âme dans chaque chanson. 
+              Ma voix est le véhicule de mes émotions, de mes histoires, de mes rêves.
+            </p>
+            <p className="text-gray-400 mb-4">
+              Chaque note chantée est une invitation à partager un moment unique, une connexion authentique 
+              entre l'artiste et son public. 🎵
+            </p>
+            <div className="glass rounded-xl p-4 mb-8 border-l-4 border-indigo-500">
+              <p className="text-indigo-300 text-sm italic">
+                🎤 <strong>Mode Karaoké activé !</strong> Cliquez sur une chanson pour entendre la voix de l'artiste chanter les paroles en français. Les paroles s'affichent en temps réel !
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="glass rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold gradient-text mb-1">6</div>
+                <div className="text-sm text-gray-400">Chansons originales</div>
+              </div>
+              <div className="glass rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold gradient-text mb-1">100%</div>
+                <div className="text-sm text-gray-400">Authentique</div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <span className="px-4 py-2 rounded-full glass text-sm text-gray-300">🎤 Chanteur</span>
+              <span className="px-4 py-2 rounded-full glass text-sm text-gray-300">🎵 Compositeur</span>
+              <span className="px-4 py-2 rounded-full glass text-sm text-gray-300">✍️ Parolier</span>
+              <span className="px-4 py-2 rounded-full glass text-sm text-gray-300">🎸 Multi-instrumentiste</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -773,7 +1064,7 @@ function Footer() {
               <span className="gradient-text font-[Playfair_Display]">MesChansons</span>
             </div>
             <p className="text-gray-400 text-sm">
-              Musique originale disponible dans le monde entier. Merci pour votre soutien ! 🎵
+              Musique originale avec paroles disponible dans le monde entier. Merci pour votre soutien ! 🎵
             </p>
           </div>
 
@@ -806,7 +1097,7 @@ function Footer() {
   );
 }
 
-function AudioPlayer({ currentSong, isPlaying, onPlayPause, onNext, onPrev, progress, onSeek }: {
+function AudioPlayer({ currentSong, isPlaying, onPlayPause, onNext, onPrev, progress, onSeek, onShowLyrics }: {
   currentSong: typeof songs[0] | null;
   isPlaying: boolean;
   onPlayPause: () => void;
@@ -814,6 +1105,7 @@ function AudioPlayer({ currentSong, isPlaying, onPlayPause, onNext, onPrev, prog
   onPrev: () => void;
   progress: number;
   onSeek: (v: number) => void;
+  onShowLyrics: () => void;
 }) {
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -882,9 +1174,62 @@ function AudioPlayer({ currentSong, isPlaying, onPlayPause, onNext, onPrev, prog
             </div>
           </div>
 
+          {/* Lyrics button */}
+          <button onClick={onShowLyrics} className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs text-indigo-300 hover:text-white transition" title="Voir les paroles">
+            <i className="fas fa-align-left"></i>
+            <span>Paroles</span>
+          </button>
+
           {/* Visualizer */}
           <div className="hidden lg:block">
             <Visualizer isPlaying={isPlaying} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LyricsModal({ song, isOpen, onClose, currentTime }: { 
+  song: typeof songs[0] | null; 
+  isOpen: boolean; 
+  onClose: () => void;
+  currentTime: number;
+}) {
+  if (!isOpen || !song) return null;
+  
+  const currentLyricIndex = song.lyrics.findIndex((lyric, index) => {
+    const nextLyric = song.lyrics[index + 1];
+    return currentTime >= lyric.time && (!nextLyric || currentTime < nextLyric.time);
+  });
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/90"></div>
+      <div className="relative w-full max-w-2xl glass-strong rounded-2xl p-8 max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+          <i className="fas fa-times text-sm"></i>
+        </button>
+        
+        <h3 className="text-2xl font-bold mb-2 gradient-text font-[Playfair_Display] text-center">{song.title}</h3>
+        <p className="text-center text-gray-400 text-sm mb-6">Paroles</p>
+        
+        <div className="overflow-y-auto max-h-[60vh] px-4">
+          <div className="space-y-4">
+            {song.lyrics.map((lyric, index) => (
+              <div
+                key={index}
+                className={`text-center transition-all duration-500 ${
+                  index === currentLyricIndex
+                    ? 'text-2xl font-bold text-white scale-110'
+                    : index < currentLyricIndex
+                    ? 'text-gray-500 text-sm'
+                    : 'text-gray-400 text-base'
+                }`}
+              >
+                {lyric.text || '\u00A0'}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -958,7 +1303,7 @@ function SupportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
 
 function ShareModal({ song, isOpen, onClose }: { song: typeof songs[0] | null; isOpen: boolean; onClose: () => void }) {
   if (!isOpen || !song) return null;
-  const text = `🎵 Écoutez "${song.title}" - Musique originale disponible partout !`;
+  const text = `🎵 Écoutez "${song.title}" - Musique originale avec paroles disponible partout !`;
   const url = window.location.href;
   const shareLinks = [
     { name: "Twitter", icon: "fab fa-x-twitter", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
@@ -997,8 +1342,10 @@ export default function App() {
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [shareSong, setShareSong] = useState<typeof songs[0] | null>(null);
+  const [lyricsSong, setLyricsSong] = useState<typeof songs[0] | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('accueil');
+  const [currentTime, setCurrentTime] = useState(0);
   const progressRef = useRef(0);
 
   const currentSong = songs.find(s => s.id === currentSongId) || null;
@@ -1010,12 +1357,22 @@ export default function App() {
         setIsPlaying(false);
       } else {
         const song = songs.find(s => s.id === id);
-        if (song) audioSynth.play(song.freq);
+        if (song) {
+          audioSynth.play(song.freq);
+          audioSynth.singLyrics(song.lyrics, (index) => {
+            setCurrentTime(song.lyrics[index].time);
+          });
+        }
         setIsPlaying(true);
       }
     } else {
       const song = songs.find(s => s.id === id);
-      if (song) audioSynth.play(song.freq);
+      if (song) {
+        audioSynth.play(song.freq);
+        audioSynth.singLyrics(song.lyrics, (index) => {
+          setCurrentTime(song.lyrics[index].time);
+        });
+      }
       setCurrentSongId(id);
       setIsPlaying(true);
     }
@@ -1027,6 +1384,9 @@ export default function App() {
       setIsPlaying(false);
     } else if (currentSong) {
       audioSynth.play(currentSong.freq);
+      audioSynth.singLyrics(currentSong.lyrics, (index) => {
+        setCurrentTime(currentSong.lyrics[index].time);
+      });
       setIsPlaying(true);
     }
   }, [isPlaying, currentSong]);
@@ -1037,6 +1397,9 @@ export default function App() {
     const nextIdx = (idx + 1) % songs.length;
     const nextSong = songs[nextIdx];
     audioSynth.play(nextSong.freq);
+    audioSynth.singLyrics(nextSong.lyrics, (index) => {
+      setCurrentTime(nextSong.lyrics[index].time);
+    });
     setCurrentSongId(nextSong.id);
     setIsPlaying(true);
   }, [currentSongId]);
@@ -1047,6 +1410,9 @@ export default function App() {
     const prevIdx = (idx - 1 + songs.length) % songs.length;
     const prevSong = songs[prevIdx];
     audioSynth.play(prevSong.freq);
+    audioSynth.singLyrics(prevSong.lyrics, (index) => {
+      setCurrentTime(prevSong.lyrics[index].time);
+    });
     setCurrentSongId(prevSong.id);
     setIsPlaying(true);
   }, [currentSongId]);
@@ -1064,10 +1430,14 @@ export default function App() {
     setShareSong(song);
   }, []);
 
+  const handleShowLyrics = useCallback((song: typeof songs[0]) => {
+    setLyricsSong(song);
+  }, []);
+
   // Section tracking
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['accueil', 'chansons', 'videos', 'ecouter', 'supporter', 'apropos'];
+      const sections = ['accueil', 'chansons', 'videos', 'artiste', 'ecouter', 'supporter', 'apropos'];
       for (const id of sections) {
         const el = document.getElementById(id);
         if (el) {
@@ -1103,7 +1473,9 @@ export default function App() {
           likedSongs={likedSongs}
           onLike={handleLike}
           onShare={handleShare}
+          onShowLyrics={handleShowLyrics}
         />
+        <ArtistSection isPlaying={isPlaying} currentSong={currentSong} />
         <VideosSection />
         <ListenSection />
         <SupportSection />
@@ -1122,11 +1494,13 @@ export default function App() {
         onPrev={handlePrev}
         progress={progressRef.current}
         onSeek={() => {}}
+        onShowLyrics={() => currentSong && setLyricsSong(currentSong)}
       />
 
       <FollowModal isOpen={followModalOpen} onClose={() => setFollowModalOpen(false)} />
       <SupportModal isOpen={supportModalOpen} onClose={() => setSupportModalOpen(false)} />
       <ShareModal song={shareSong} isOpen={!!shareSong} onClose={() => setShareSong(null)} />
+      <LyricsModal song={lyricsSong} isOpen={!!lyricsSong} onClose={() => setLyricsSong(null)} currentTime={currentTime} />
     </div>
   );
 }
