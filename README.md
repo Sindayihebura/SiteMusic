@@ -1,18 +1,18 @@
 # 🎵 MesChansons - Plateforme de Création Musicale avec IA
 
-## 🎉 Système Audio Fonctionnel !
+## 🎉 Système Audio avec Upload de Vrais Fichiers !
 
-Votre site musical est maintenant équipé d'un **système de génération audio réel** qui utilise la **Web Speech API** du navigateur pour créer des voix qui chantent réellement les paroles !
+Votre site musical est maintenant équipé d'un **système d'upload de vrais fichiers audio** qui vous permet de générer de la vraie musique avec des services IA comme Suno AI ou Udio, puis d'uploader les fichiers MP3 directement dans le site !
 
 ## ✨ Fonctionnalités Principales
 
-### 🎤 Génération Audio avec Voix Réelle
-- ✅ **Voix synthétique** qui chante les paroles en français
-- ✅ **Mode karaoké** avec paroles qui défilent en temps réel
-- ✅ **Adaptation vocale** selon le profil fictif (âge, genre)
-- ✅ **Mélodie de fond** générée par Web Audio API
+### 🎤 Upload de Vrais Fichiers Audio
+- ✅ **Génération audio** via Suno AI, Udio ou autres services IA
+- ✅ **Upload de fichiers MP3** directement dans le site
+- ✅ **Vrai lecteur audio HTML5** avec contrôles complets
 - ✅ **3 versions** par chanson : complète, instrumentale, courte (30s)
-- ✅ **Fonctionne immédiatement** sans configuration API
+- ✅ **Stockage local** en base64 (pas besoin de serveur)
+- ✅ **Téléchargement** des fichiers audio
 
 ### 📊 Gestion des Chansons
 - ✅ **50 chansons** avec métadonnées complètes
@@ -31,8 +31,9 @@ Votre site musical est maintenant équipé d'un **système de génération audio
 - ✅ **Barre de progression** (X/50 chansons)
 - ✅ **Génération par lots** de 5 chansons
 - ✅ **Filtres** par statut (brouillon, complète, publiée)
-- ✅ **Lecteur karaoké** intégré
-- ✅ **Configuration API** pour services audio externes
+- ✅ **Upload de fichiers audio** avec lecteur intégré
+- ✅ **Prompts audio** prêts à copier pour Suno/Udio
+- ✅ **Gestion de 3 versions** par chanson
 
 ## 🚀 Démarrage Rapide
 
@@ -60,47 +61,73 @@ http://localhost:5173/admin
 ### 4. Générer l'Audio d'une Chanson
 
 1. Cliquez sur une chanson complète (ex: "Je pars de zéro")
-2. Dans la section **"🎵 Génération Audio"**, cliquez sur **"✨ Générer l'audio chanté"**
-3. Attendez quelques secondes
-4. Cliquez sur **▶️ Play** pour écouter la chanson avec les paroles qui défilent !
+2. Dans la section **"🎵 Audio de la Chanson"**, cliquez sur **"📋 Copier le prompt"**
+3. Allez sur [Suno AI](https://suno.ai) ou [Udio](https://udio.com)
+4. Collez le prompt et générez l'audio (1-2 minutes)
+5. Téléchargez le fichier MP3
+6. Retournez dans l'admin et cliquez sur **"📤 Uploader l'audio"**
+7. Sélectionnez le fichier MP3
+8. ✅ Le vrai lecteur audio apparaît ! Cliquez sur ▶️ Play pour écouter !
+
+**Voir le guide complet** : [GUIDE_GENERATION_AUDIO_REEL.md](./GUIDE_GENERATION_AUDIO_REEL.md)
 
 ## 🎵 Comment Fonctionne la Génération Audio
 
-### Web Speech API (Par Défaut)
+### Système d'Upload de Vrais Fichiers Audio
 
-Le système utilise la **Web Speech API** native du navigateur :
+Le système fonctionne en **3 étapes** :
 
-```typescript
-// La voix chante les paroles
-const utterance = new SpeechSynthesisUtterance(parole);
-utterance.lang = 'fr-FR';
-utterance.pitch = 1.1; // Ajusté selon le profil vocal
-utterance.rate = 0.9;  // Légèrement ralenti pour effet chanté
-speechSynthesis.speak(utterance);
-```
+#### Étape 1 : Générer l'Audio sur un Service IA
 
-### Adaptation de la Voix
+1. Copiez le prompt audio depuis l'admin
+2. Allez sur [Suno AI](https://suno.ai) ou [Udio](https://udio.com)
+3. Collez le prompt et générez l'audio
+4. Téléchargez le fichier MP3
 
-La voix est automatiquement adaptée selon le profil vocal fictif :
+#### Étape 2 : Uploader le Fichier dans le Site
 
-- **Adolescents (16-17 ans)** : Pitch plus élevé, voix jeune
-- **Jeunes adultes (18-25 ans)** : Pitch adapté, voix naturelle
-- **Adultes (26-40 ans)** : Pitch plus bas, voix mature
-- **Féminin** : Pitch augmenté de +0.2
-- **Masculin** : Pitch diminué de -0.1
-
-### Mélodie de Fond
-
-En parallèle de la voix, une mélodie de fond est générée avec Web Audio API :
+1. Retournez dans l'admin
+2. Cliquez sur "📤 Uploader l'audio"
+3. Sélectionnez le fichier MP3
+4. Le fichier est converti en base64 et stocké
 
 ```typescript
-// Création d'oscillateurs pour la mélodie
-const oscillator = audioContext.createOscillator();
-oscillator.type = 'sine';
-oscillator.frequency.value = frequency;
-oscillator.connect(gainNode);
-oscillator.start();
+// Conversion du fichier en base64
+const reader = new FileReader();
+reader.onload = () => {
+  const base64 = reader.result; // data:audio/mp3;base64,...
+  // Stocké dans localStorage
+};
+reader.readAsDataURL(file);
 ```
+
+#### Étape 3 : Écouter le VRAI Audio
+
+1. Le vrai lecteur audio HTML5 apparaît
+2. Cliquez sur ▶️ Play
+3. Écoutez la vraie chanson avec voix, mélodie et instruments !
+
+### Services de Génération Audio Recommandés
+
+#### Suno AI (Recommandé)
+- **Site** : [https://suno.ai](https://suno.ai)
+- **Qualité** : Excellente, voix naturelles
+- **Coût** : Gratuit (5/jour) ou $10/mois (500 générations)
+- **Temps** : 1-2 minutes par chanson
+
+#### Udio
+- **Site** : [https://udio.com](https://udio.com)
+- **Qualité** : Studio professionnel
+- **Coût** : Gratuit (10/mois) ou $15/mois (100 générations)
+- **Temps** : 2-3 minutes par chanson
+
+### Stockage des Fichiers
+
+Les fichiers audio uploadés sont stockés en **base64** dans le **localStorage** du navigateur :
+- ✅ Pas besoin de serveur
+- ✅ Tout reste dans le navigateur
+- ⚠️ Limite : ~5-10 MB (environ 10-20 chansons)
+- 💡 Pour plus de stockage : utilisez Cloudinary, AWS S3, ou Firebase
 
 ## 📋 Les 5 Premières Chansons Complètes
 

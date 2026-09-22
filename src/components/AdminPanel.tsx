@@ -5,27 +5,25 @@ import {
   getSongsByStatus,
   getProgress,
   markAsPublished,
-  updateSong
 } from '../data/songGenerator';
 import {
-  generateAudio,
   updateSongAudio,
   getAudioStatus,
   generateAudioPrompt,
+  uploadAudioFile,
   getAudioConfig,
   saveAudioConfig
 } from '../data/audioGenerator';
-import AudioPlayer from './AudioPlayer';
-import KaraokePlayer from './KaraokePlayer';
+import RealAudioPlayer from './RealAudioPlayer';
 
 export default function AdminPanel() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [filter, setFilter] = useState<'all' | 'brouillon' | 'en_cours' | 'complete' | 'publiee'>('all');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [generatingAudio, setGeneratingAudio] = useState<{songId: number, type: string} | null>(null);
+  const [uploading, setUploading] = useState<{songId: number, type: string} | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [configService, setConfigService] = useState<'suno' | 'udio' | 'replicate' | 'webspeech'>('webspeech');
+  const [configService, setConfigService] = useState<'suno' | 'udio' | 'manual'>('manual');
   const [configApiKey, setConfigApiKey] = useState('');
 
   useEffect(() => {
@@ -56,37 +54,31 @@ export default function AdminPanel() {
     setSongs(initializeDatabase());
   };
 
-  const handleGenerateAudio = async (song: Song, type: 'full' | 'instrumental' | 'short') => {
-    setGeneratingAudio({ songId: song.id, type });
+  const handleUploadAudio = async (song: Song, type: 'full' | 'instrumental' | 'short', file: File) => {
+    setUploading({ songId: song.id, type });
     
     try {
-      // Update status to "en_cours"
+      // Convert file to base64
+      const audioUrl = await uploadAudioFile(file);
+      
+      // Create audio data
       const audioData = {
-        audio_statut: 'en_cours' as const,
-        audio_service_utilise: getAudioConfig().service
+        audio_statut: 'termine' as const,
+        audio_url: audioUrl,
+        audio_format: file.type.split('/')[1] || 'mp3',
+        audio_duree_secondes: 0, // Will be calculated by player
+        audio_date_generation: new Date().toISOString(),
+        audio_prompt_utilise: generateAudioPrompt(song, type),
+        audio_version: type === 'short' ? 'courte' : type === 'instrumental' ? 'instrumentale' : 'complete',
+        audio_est_instrumental: type === 'instrumental',
+        audio_service_utilise: 'manual'
       };
+      
+      // Save to database
       updateSongAudio(song.id, audioData, type);
       setSongs(initializeDatabase());
       
-      // Generate audio with callbacks for karaoke
-      const result = await generateAudio(
-        song, 
-        type,
-        (lineIndex, line) => {
-          // This callback is used by KaraokePlayer
-          console.log(`Line ${lineIndex}: ${line}`);
-        },
-        () => {
-          // Completion callback
-          console.log('Audio generation complete');
-        }
-      );
-      
-      // Save result
-      updateSongAudio(song.id, result, type);
-      setSongs(initializeDatabase());
-      
-      // Refresh selected song if it's the one being generated
+      // Refresh selected song
       if (selectedSong && selectedSong.id === song.id) {
         const updatedSongs = initializeDatabase();
         const updatedSong = updatedSongs.find(s => s.id === song.id);
@@ -95,15 +87,12 @@ export default function AdminPanel() {
         }
       }
       
+      alert('✅ Audio uploadé avec succès !');
+      
     } catch (error) {
-      const errorData = {
-        audio_statut: 'erreur' as const,
-        audio_message_erreur: error instanceof Error ? error.message : 'Erreur inconnue'
-      };
-      updateSongAudio(song.id, errorData, type);
-      setSongs(initializeDatabase());
+      alert(`❌ Erreur lors de l'upload : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
-      setGeneratingAudio(null);
+      setUploading(null);
     }
   };
 
@@ -139,14 +128,14 @@ export default function AdminPanel() {
         <div className="mb-8 flex justify-between items-start">
           <div>
             <h1 className="text-4xl font-bold mb-2 gradient-text">Administration des Chansons</h1>
-            <p className="text-gray-400">Gérez vos 50 chansons originales avec génération audio IA</p>
+            <p className="text-gray-400">Gérez vos 50 chansons originales avec upload audio</p>
           </div>
           <button
             onClick={() => setShowConfig(true)}
             className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition flex items-center gap-2"
           >
             <i className="fas fa-cog"></i>
-            Config API Audio
+            Config
           </button>
         </div>
 
@@ -179,25 +168,25 @@ export default function AdminPanel() {
             onClick={() => setFilter('brouillon')}
             className="px-6 py-3 bg-gray-700 rounded-lg font-semibold hover:bg-gray-600 transition"
           >
-            Voir les brouillons ({getSongsByStatus('brouillon').length})
+            Brouillons ({getSongsByStatus('brouillon').length})
           </button>
           <button
             onClick={() => setFilter('complete')}
             className="px-6 py-3 bg-gray-700 rounded-lg font-semibold hover:bg-gray-600 transition"
           >
-            Voir les complètes ({getSongsByStatus('complete').length})
+            Complètes ({getSongsByStatus('complete').length})
           </button>
           <button
             onClick={() => setFilter('publiee')}
             className="px-6 py-3 bg-gray-700 rounded-lg font-semibold hover:bg-gray-600 transition"
           >
-            Voir les publiées ({getSongsByStatus('publiee').length})
+            Publiées ({getSongsByStatus('publiee').length})
           </button>
           <button
             onClick={() => setFilter('all')}
             className="px-6 py-3 bg-gray-700 rounded-lg font-semibold hover:bg-gray-600 transition"
           >
-            Voir tout ({songs.length})
+            Tout ({songs.length})
           </button>
         </div>
 
@@ -250,22 +239,21 @@ export default function AdminPanel() {
         {showConfig && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50" onClick={() => setShowConfig(false)}>
             <div className="bg-gray-800 rounded-lg max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-              <h2 className="text-2xl font-bold mb-4">Configuration API Audio</h2>
+              <h2 className="text-2xl font-bold mb-4">Configuration Audio</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Service</label>
+                  <label className="block text-sm font-semibold mb-2">Mode</label>
                   <select
                     value={configService}
                     onChange={e => setConfigService(e.target.value as any)}
                     className="w-full bg-gray-700 rounded-lg px-4 py-2"
                   >
-                    <option value="webspeech">Web Speech API (Voix réelle du navigateur)</option>
-                    <option value="suno">Suno AI</option>
-                    <option value="udio">Udio</option>
-                    <option value="replicate">Replicate</option>
+                    <option value="manual">Upload Manuel (recommandé)</option>
+                    <option value="suno">Suno AI (API future)</option>
+                    <option value="udio">Udio (API future)</option>
                   </select>
                 </div>
-                {configService !== 'webspeech' && (
+                {configService !== 'manual' && (
                   <div>
                     <label className="block text-sm font-semibold mb-2">Clé API</label>
                     <input
@@ -276,9 +264,7 @@ export default function AdminPanel() {
                       className="w-full bg-gray-700 rounded-lg px-4 py-2"
                     />
                     <p className="text-xs text-gray-400 mt-2">
-                      {configService === 'suno' && 'Obtenez votre clé sur https://suno.ai/api'}
-                      {configService === 'udio' && 'Obtenez votre clé sur https://udio.com/api'}
-                      {configService === 'replicate' && 'Obtenez votre clé sur https://replicate.com/account/api-tokens'}
+                      ⚠️ Les APIs Suno et Udio ne sont pas encore publiques. Utilisez le mode manuel.
                     </p>
                   </div>
                 )}
@@ -328,49 +314,62 @@ export default function AdminPanel() {
                 )}
               </div>
 
-              {/* Audio Generation Section */}
+              {/* Audio Upload Section */}
               {selectedSong.statut === 'complete' && (
                 <div className="mb-6 bg-gray-900 rounded-lg p-4">
-                  <h3 className="text-xl font-bold mb-4">🎵 Génération Audio</h3>
+                  <h3 className="text-xl font-bold mb-4">🎵 Audio de la Chanson</h3>
                   
+                  {/* Instructions */}
+                  <div className="mb-6 p-4 bg-blue-900/30 border border-blue-500/50 rounded-lg">
+                    <h4 className="font-semibold mb-2">📋 Comment générer l'audio :</h4>
+                    <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                      <li>Copiez le prompt ci-dessous</li>
+                      <li>Allez sur <a href="https://suno.ai" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Suno AI</a> ou <a href="https://udio.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Udio</a></li>
+                      <li>Collez le prompt et générez l'audio</li>
+                      <li>Téléchargez le fichier MP3</li>
+                      <li>Uploadez-le ici</li>
+                    </ol>
+                  </div>
+
                   {/* Full Version */}
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-2">
                       <h4 className="font-semibold">Version complète avec voix</h4>
                       <span className={`text-sm ${
                         getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' ? 'text-green-400' :
-                        getAudioStatus(selectedSong, 'full')?.audio_statut === 'en_cours' ? 'text-yellow-400' :
-                        getAudioStatus(selectedSong, 'full')?.audio_statut === 'erreur' ? 'text-red-400' :
                         'text-gray-400'
                       }`}>
                         {getAudioStatusText(selectedSong, 'full')}
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' && (
+                    {getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'full')?.audio_url && (
                       <div className="mb-3">
-                        {getAudioStatus(selectedSong, 'full')?.audio_service_utilise === 'webspeech' ? (
-                          <KaraokePlayer song={selectedSong} type="full" />
-                        ) : (
-                          <AudioPlayer
-                            audioUrl={getAudioStatus(selectedSong, 'full')!.audio_url!}
-                            title={`${selectedSong.titre} - Version complète`}
-                            artist={selectedSong.casting_vocal?.prenom_fictif}
-                          />
-                        )}
+                        <RealAudioPlayer
+                          audioUrl={getAudioStatus(selectedSong, 'full')!.audio_url!}
+                          title={`${selectedSong.titre} - Version complète`}
+                          artist={selectedSong.casting_vocal?.prenom_fictif}
+                        />
                       </div>
                     )}
                     
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleGenerateAudio(selectedSong, 'full')}
-                        disabled={generatingAudio?.songId === selectedSong.id && generatingAudio?.type === 'full'}
-                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50"
-                      >
-                        {getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' 
-                          ? '🔄 Régénérer une nouvelle version' 
-                          : '✨ Générer l\'audio chanté'}
-                      </button>
+                    <div className="flex gap-2 flex-wrap">
+                      <label className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg font-semibold hover:opacity-90 transition cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadAudio(selectedSong, 'full', file);
+                          }}
+                          className="hidden"
+                        />
+                        {uploading?.songId === selectedSong.id && uploading?.type === 'full' 
+                          ? '⏳ Upload en cours...' 
+                          : getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine'
+                          ? '🔄 Remplacer l\'audio'
+                          : '📤 Uploader l\'audio'}
+                      </label>
                       <button
                         onClick={() => {
                           const prompt = generateAudioPrompt(selectedSong, 'full');
@@ -389,36 +388,48 @@ export default function AdminPanel() {
                       <h4 className="font-semibold">Version instrumentale (sans voix)</h4>
                       <span className={`text-sm ${
                         getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' ? 'text-green-400' :
-                        getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'en_cours' ? 'text-yellow-400' :
-                        getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'erreur' ? 'text-red-400' :
                         'text-gray-400'
                       }`}>
                         {getAudioStatusText(selectedSong, 'instrumental')}
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' && (
+                    {getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'instrumental')?.audio_url && (
                       <div className="mb-3">
-                        {getAudioStatus(selectedSong, 'instrumental')?.audio_service_utilise === 'webspeech' ? (
-                          <KaraokePlayer song={selectedSong} type="instrumental" />
-                        ) : (
-                          <AudioPlayer
-                            audioUrl={getAudioStatus(selectedSong, 'instrumental')!.audio_url!}
-                            title={`${selectedSong.titre} - Instrumental`}
-                          />
-                        )}
+                        <RealAudioPlayer
+                          audioUrl={getAudioStatus(selectedSong, 'instrumental')!.audio_url!}
+                          title={`${selectedSong.titre} - Instrumental`}
+                        />
                       </div>
                     )}
                     
-                    <button
-                      onClick={() => handleGenerateAudio(selectedSong, 'instrumental')}
-                      disabled={generatingAudio?.songId === selectedSong.id && generatingAudio?.type === 'instrumental'}
-                      className="px-4 py-2 bg-purple-600 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50"
-                    >
-                      {getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' 
-                        ? '🔄 Régénérer l\'instrumental' 
-                        : '🎹 Générer version instrumentale'}
-                    </button>
+                    <div className="flex gap-2 flex-wrap">
+                      <label className="px-4 py-2 bg-purple-600 rounded-lg font-semibold hover:bg-purple-700 transition cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadAudio(selectedSong, 'instrumental', file);
+                          }}
+                          className="hidden"
+                        />
+                        {uploading?.songId === selectedSong.id && uploading?.type === 'instrumental'
+                          ? '⏳ Upload en cours...'
+                          : getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine'
+                          ? '🔄 Remplacer'
+                          : '📤 Uploader'}
+                      </label>
+                      <button
+                        onClick={() => {
+                          const prompt = generateAudioPrompt(selectedSong, 'instrumental');
+                          copyToClipboard(prompt, 'audio-instrumental');
+                        }}
+                        className="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+                      >
+                        {copiedField === 'audio-instrumental' ? '✓ Copié!' : '📋 Copier le prompt'}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Short Version */}
@@ -427,46 +438,49 @@ export default function AdminPanel() {
                       <h4 className="font-semibold">Version courte (30s pour réseaux sociaux)</h4>
                       <span className={`text-sm ${
                         getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' ? 'text-green-400' :
-                        getAudioStatus(selectedSong, 'short')?.audio_statut === 'en_cours' ? 'text-yellow-400' :
-                        getAudioStatus(selectedSong, 'short')?.audio_statut === 'erreur' ? 'text-red-400' :
                         'text-gray-400'
                       }`}>
                         {getAudioStatusText(selectedSong, 'short')}
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' && (
+                    {getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'short')?.audio_url && (
                       <div className="mb-3">
-                        {getAudioStatus(selectedSong, 'short')?.audio_service_utilise === 'webspeech' ? (
-                          <KaraokePlayer song={selectedSong} type="short" />
-                        ) : (
-                          <AudioPlayer
-                            audioUrl={getAudioStatus(selectedSong, 'short')!.audio_url!}
-                            title={`${selectedSong.titre} - 30s`}
-                          />
-                        )}
+                        <RealAudioPlayer
+                          audioUrl={getAudioStatus(selectedSong, 'short')!.audio_url!}
+                          title={`${selectedSong.titre} - 30s`}
+                        />
                       </div>
                     )}
                     
-                    <button
-                      onClick={() => handleGenerateAudio(selectedSong, 'short')}
-                      disabled={generatingAudio?.songId === selectedSong.id && generatingAudio?.type === 'short'}
-                      className="px-4 py-2 bg-orange-600 rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
-                    >
-                      {getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' 
-                        ? '🔄 Régénérer la version courte' 
-                        : '📱 Générer version 30 secondes'}
-                    </button>
-                  </div>
-
-                  {generatingAudio?.songId === selectedSong.id && (
-                    <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="animate-spin w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full"></div>
-                        <p className="text-yellow-400">Génération audio en cours... Cela peut prendre 1-3 minutes.</p>
-                      </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <label className="px-4 py-2 bg-orange-600 rounded-lg font-semibold hover:bg-orange-700 transition cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadAudio(selectedSong, 'short', file);
+                          }}
+                          className="hidden"
+                        />
+                        {uploading?.songId === selectedSong.id && uploading?.type === 'short'
+                          ? '⏳ Upload en cours...'
+                          : getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine'
+                          ? '🔄 Remplacer'
+                          : '📤 Uploader'}
+                      </label>
+                      <button
+                        onClick={() => {
+                          const prompt = generateAudioPrompt(selectedSong, 'short');
+                          copyToClipboard(prompt, 'audio-short');
+                        }}
+                        className="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+                      >
+                        {copiedField === 'audio-short' ? '✓ Copié!' : '📋 Copier le prompt'}
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
 
@@ -518,21 +532,9 @@ export default function AdminPanel() {
                       <span className="text-gray-400">Type de voix:</span>
                       <p>{selectedSong.casting_vocal.type_de_voix}</p>
                     </div>
-                    <div>
-                      <span className="text-gray-400">Texture vocale:</span>
-                      <p>{selectedSong.casting_vocal.texture_vocale}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Registre vocal:</span>
-                      <p>{selectedSong.casting_vocal.registre_vocal}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Style de chant:</span>
-                      <p>{selectedSong.casting_vocal.style_de_chant}</p>
-                    </div>
                   </div>
                   <div className="mt-4">
-                    <span className="text-gray-400">Justification du choix:</span>
+                    <span className="text-gray-400">Justification:</span>
                     <p className="mt-1 text-indigo-300">{selectedSong.casting_vocal.justification_du_choix}</p>
                   </div>
                 </div>
@@ -544,91 +546,13 @@ export default function AdminPanel() {
                   <h3 className="text-xl font-bold mb-3">📝 Paroles Complètes</h3>
                   <div className="space-y-4 text-sm">
                     <div>
-                      <span className="text-gray-400 font-semibold">Introduction:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-gray-300">{selectedSong.paroles.introduction}</pre>
+                      <span className="text-gray-400 font-semibold">Refrain:</span>
+                      <pre className="mt-1 whitespace-pre-wrap text-purple-300 font-semibold">{selectedSong.paroles.refrain_1}</pre>
                     </div>
                     <div>
                       <span className="text-gray-400 font-semibold">Couplet 1:</span>
                       <pre className="mt-1 whitespace-pre-wrap text-gray-300">{selectedSong.paroles.couplet_1}</pre>
                     </div>
-                    <div>
-                      <span className="text-gray-400 font-semibold">Pré-refrain:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-indigo-300">{selectedSong.paroles.pre_refrain_1}</pre>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 font-semibold">Refrain:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-purple-300 font-semibold">{selectedSong.paroles.refrain_1}</pre>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 font-semibold">Couplet 2:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-gray-300">{selectedSong.paroles.couplet_2}</pre>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 font-semibold">Pont:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-amber-300">{selectedSong.paroles.pont}</pre>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 font-semibold">Outro:</span>
-                      <pre className="mt-1 whitespace-pre-wrap text-gray-300">{selectedSong.paroles.outro}</pre>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Audio Direction */}
-              {selectedSong.direction_audio && (
-                <div className="mb-6 bg-gray-900 rounded-lg p-4">
-                  <h3 className="text-xl font-bold mb-3">🎵 Direction Audio</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-400">BPM:</span>
-                      <p>{selectedSong.direction_audio.bpm}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Rythme:</span>
-                      <p>{selectedSong.direction_audio.rythme}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Ambiance sonore:</span>
-                      <p>{selectedSong.direction_audio.ambiance_sonore}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Instruments principaux:</span>
-                      <p>{selectedSong.direction_audio.instruments_principaux}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Video Direction */}
-              {selectedSong.direction_video && (
-                <div className="mb-6 bg-gray-900 rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-xl font-bold">🎬 Direction Vidéo</h3>
-                    <button
-                      onClick={() => copyToClipboard(selectedSong.direction_video!.prompt_video, 'video')}
-                      className="px-3 py-1 bg-purple-600 rounded text-sm hover:bg-purple-700 transition"
-                    >
-                      {copiedField === 'video' ? '✓ Copié!' : '📋 Copier le prompt'}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="md:col-span-2">
-                      <span className="text-gray-400">Concept du clip:</span>
-                      <p>{selectedSong.direction_video.concept_du_clip}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Lieu:</span>
-                      <p>{selectedSong.direction_video.lieu}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Moment de la journée:</span>
-                      <p>{selectedSong.direction_video.moment_de_la_journee}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 bg-gray-800 rounded p-3">
-                    <span className="text-gray-400 text-xs">Prompt Vidéo:</span>
-                    <p className="mt-1 text-purple-400 font-mono text-sm">{selectedSong.direction_video.prompt_video}</p>
                   </div>
                 </div>
               )}

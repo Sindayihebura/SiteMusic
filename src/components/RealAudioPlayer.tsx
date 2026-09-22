@@ -1,44 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import { Song } from '../data/songDatabase';
 
-interface AudioPlayerProps {
+interface RealAudioPlayerProps {
   audioUrl: string;
   title: string;
   artist?: string;
-  onDownload?: () => void;
 }
 
-export default function AudioPlayer({ audioUrl, title, artist, onDownload }: AudioPlayerProps) {
+export default function RealAudioPlayer({ audioUrl, title, artist }: RealAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
-
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('ended', handleEnded);
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, [audioUrl]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
-  }, [volume, isMuted]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -49,6 +23,18 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
       audioRef.current.play();
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,11 +48,9 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    setIsMuted(false);
-  };
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
   };
 
   const formatTime = (time: number) => {
@@ -76,22 +60,15 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const handleDownload = () => {
-    if (onDownload) {
-      onDownload();
-    } else {
-      const link = document.createElement('a');
-      link.href = audioUrl;
-      link.download = `${title}.mp3`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   return (
-    <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-xl p-6 border border-indigo-500/30">
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+    <div className="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 rounded-xl p-6 border border-indigo-500/30">
+      <audio
+        ref={audioRef}
+        src={audioUrl}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => setIsPlaying(false)}
+      />
       
       {/* Song Info */}
       <div className="flex items-center gap-4 mb-4">
@@ -112,7 +89,7 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
           max={duration || 0}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
           style={{
             background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(currentTime / duration) * 100}%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`
           }}
@@ -125,7 +102,6 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
 
       {/* Controls */}
       <div className="flex items-center justify-between">
-        {/* Play/Pause Button */}
         <button
           onClick={togglePlay}
           className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white hover:opacity-90 transition"
@@ -135,53 +111,28 @@ export default function AudioPlayer({ audioUrl, title, artist, onDownload }: Aud
 
         {/* Volume Control */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={toggleMute}
-            className="text-gray-400 hover:text-white transition"
-          >
-            <i className={`fas ${isMuted || volume === 0 ? 'fa-volume-mute' : volume < 0.5 ? 'fa-volume-down' : 'fa-volume-up'}`}></i>
-          </button>
+          <i className="fas fa-volume-up text-gray-400"></i>
           <input
             type="range"
             min="0"
             max="1"
             step="0.01"
-            value={isMuted ? 0 : volume}
+            value={volume}
             onChange={handleVolumeChange}
-            className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+            className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
           />
         </div>
 
         {/* Download Button */}
-        <button
-          onClick={handleDownload}
+        <a
+          href={audioUrl}
+          download={`${title}.mp3`}
           className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition text-sm font-semibold flex items-center gap-2"
         >
           <i className="fas fa-download"></i>
           Télécharger
-        </button>
+        </a>
       </div>
-
-      {/* Custom Slider Styles */}
-      <style>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #6366f1;
-          cursor: pointer;
-          border: 2px solid white;
-        }
-        .slider::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #6366f1;
-          cursor: pointer;
-          border: 2px solid white;
-        }
-      `}</style>
     </div>
   );
 }
