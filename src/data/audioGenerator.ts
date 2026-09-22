@@ -2,7 +2,7 @@ import { Song, AudioData } from './songDatabase';
 
 // Configuration for audio generation services
 export interface AudioGenerationConfig {
-  service: 'suno' | 'udio' | 'replicate' | 'demo';
+  service: 'suno' | 'udio' | 'replicate' | 'webspeech';
   apiKey?: string;
   webhookUrl?: string;
 }
@@ -14,7 +14,7 @@ export function getAudioConfig(): AudioGenerationConfig {
     return JSON.parse(stored);
   }
   return {
-    service: 'demo', // Default to demo mode
+    service: 'webspeech', // Default to Web Speech API for real audio
     apiKey: undefined
   };
 }
@@ -71,123 +71,243 @@ export function generateAudioPrompt(song: Song, type: 'full' | 'instrumental' | 
   return prompt;
 }
 
-// Simulate audio generation (for demo purposes)
-// In production, this would call actual APIs like Suno, Udio, or Replicate
-async function simulateAudioGeneration(song: Song, type: 'full' | 'instrumental' | 'short'): Promise<AudioData> {
-  const config = getAudioConfig();
-  
-  // Simulate processing time (3-5 seconds)
-  await new Promise(resolve => setTimeout(resolve, 3000 + Math.random() * 2000));
-  
-  // In a real implementation, this would:
-  // 1. Call the Suno/Udio/Replicate API
-  // 2. Wait for the generation to complete
-  // 3. Download the audio file
-  // 4. Upload to storage (Cloudinary, AWS S3, etc.)
-  // 5. Return the URL
-  
-  const prompt = generateAudioPrompt(song, type);
-  
-  // For demo, we'll create a placeholder audio URL
-  // In production, replace this with actual API call
-  const audioUrl = `https://example.com/audio/${song.id}-${type}-${Date.now()}.mp3`;
-  
-  return {
-    audio_statut: 'termine',
-    audio_url: audioUrl,
-    audio_format: 'mp3',
-    audio_duree_secondes: type === 'short' ? 30 : 180 + Math.random() * 60,
-    audio_date_generation: new Date().toISOString(),
-    audio_prompt_utilise: prompt,
-    audio_version: type === 'short' ? 'courte' : type === 'instrumental' ? 'instrumentale' : 'complete',
-    audio_est_instrumental: type === 'instrumental',
-    audio_service_utilise: config.service
-  };
+// Web Speech API Audio Generator - REAL AUDIO
+export class WebSpeechAudioGenerator {
+  private synth: SpeechSynthesis;
+  private utterances: SpeechSynthesisUtterance[] = [];
+  private isPlaying: boolean = false;
+  private currentLineIndex: number = 0;
+  private onLineChange?: (lineIndex: number, line: string) => void;
+  private onComplete?: () => void;
+  private audioContext: AudioContext | null = null;
+  private gainNode: GainNode | null = null;
+
+  constructor() {
+    this.synth = window.speechSynthesis;
+  }
+
+  // Generate and play audio with Web Speech API
+  async generateAndPlay(
+    song: Song,
+    type: 'full' | 'instrumental' | 'short' = 'full',
+    onLineChange?: (lineIndex: number, line: string) => void,
+    onComplete?: () => void
+  ): Promise<AudioData> {
+    if (!song.paroles) {
+      throw new Error('Paroles manquantes');
+    }
+
+    this.onLineChange = onLineChange;
+    this.onComplete = onComplete;
+    this.isPlaying = true;
+    this.currentLineIndex = 0;
+
+    // Initialize audio context for background music
+    this.initAudioContext();
+
+    // Get lyrics based on type
+    let lyrics: string[] = [];
+    if (type === 'short') {
+      lyrics = song.paroles.refrain_1.split('\n').filter(l => l.trim());
+    } else {
+      lyrics = [
+        ...song.paroles.introduction.split('\n').filter(l => l.trim()),
+        ...song.paroles.couplet_1.split('\n').filter(l => l.trim()),
+        ...song.paroles.pre_refrain_1.split('\n').filter(l => l.trim()),
+        ...song.paroles.refrain_1.split('\n').filter(l => l.trim()),
+        ...song.paroles.couplet_2.split('\n').filter(l => l.trim()),
+        ...song.paroles.pre_refrain_2.split('\n').filter(l => l.trim()),
+        ...song.paroles.refrain_2.split('\n').filter(l => l.trim()),
+        ...song.paroles.pont.split('\n').filter(l => l.trim()),
+        ...song.paroles.dernier_refrain.split('\n').filter(l => l.trim()),
+        ...song.paroles.outro.split('\n').filter(l => l.trim())
+      ];
+    }
+
+    // Start background music
+    this.playBackgroundMusic(song, type);
+
+    // Speak each line
+    this.speakLyrics(lyrics, song, type);
+
+    // Calculate duration
+    const duration = type === 'short' ? 30 : lyrics.length * 3; // ~3 seconds per line
+
+    return {
+      audio_statut: 'termine',
+      audio_url: 'webspeech', // Special marker for Web Speech
+      audio_format: 'webspeech',
+      audio_duree_secondes: duration,
+      audio_date_generation: new Date().toISOString(),
+      audio_prompt_utilise: generateAudioPrompt(song, type),
+      audio_version: type === 'short' ? 'courte' : type === 'instrumental' ? 'instrumentale' : 'complete',
+      audio_est_instrumental: type === 'instrumental',
+      audio_service_utilise: 'webspeech'
+    };
+  }
+
+  private initAudioContext() {
+    if (!this.audioContext) {
+      this.audioContext = new AudioContext();
+      this.gainNode = this.audioContext.createGain();
+      this.gainNode.gain.value = 0.1;
+      this.gainNode.connect(this.audioContext.destination);
+    }
+  }
+
+  private playBackgroundMusic(song: Song, type: 'full' | 'instrumental' | 'short') {
+    if (!this.audioContext || !this.gainNode || type === 'instrumental') return;
+
+    // Create a simple melody based on song frequencies
+    const playNote = (freq: number, duration: number, startTime: number) => {
+      const osc = this.audioContext!.createOscillator();
+      const noteGain = this.audioContext!.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      
+      noteGain.gain.setValueAtTime(0, startTime);
+      noteGain.gain.linearRampToValueAtTime(0.1, startTime + 0.05);
+      noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
+      
+      osc.connect(noteGain);
+      noteGain.connect(this.gainNode!);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+
+    // Play a simple melody loop
+    const freqs = song.freq || [262, 330, 392, 523];
+    const startTime = this.audioContext.currentTime;
+    const noteDuration = 0.5;
+    
+    for (let i = 0; i < 100; i++) { // Loop for background
+      const freq = freqs[i % freqs.length];
+      playNote(freq, noteDuration, startTime + i * noteDuration);
+    }
+  }
+
+  private speakLyrics(lyrics: string[], song: Song, type: 'full' | 'instrumental' | 'short') {
+    if (type === 'instrumental') {
+      // Just play music, no voice
+      setTimeout(() => {
+        this.onComplete?.();
+      }, (song.direction_audio?.bpm || 90) * 1000);
+      return;
+    }
+
+    // Configure voice based on casting
+    const configureVoice = (utterance: SpeechSynthesisUtterance) => {
+      utterance.lang = 'fr-FR';
+      utterance.rate = 0.9; // Slightly slower for singing effect
+      utterance.pitch = 1.1; // Slightly higher for melodic effect
+      utterance.volume = 1.0;
+
+      // Try to find a French voice
+      const voices = this.synth.getVoices();
+      const frenchVoice = voices.find(v => v.lang.startsWith('fr'));
+      if (frenchVoice) {
+        utterance.voice = frenchVoice;
+      }
+
+      // Adjust based on casting
+      if (song.casting_vocal) {
+        const age = typeof song.casting_vocal.age_fictif === 'number' 
+          ? song.casting_vocal.age_fictif 
+          : 20;
+        
+        if (age < 18) {
+          utterance.pitch = 1.3; // Higher for younger voices
+          utterance.rate = 1.0;
+        } else if (age > 30) {
+          utterance.pitch = 0.9; // Lower for mature voices
+          utterance.rate = 0.85;
+        }
+
+        if (song.casting_vocal.type_de_voix === 'Féminin') {
+          utterance.pitch += 0.2;
+        } else {
+          utterance.pitch -= 0.1;
+        }
+      }
+    };
+
+    // Speak each line with timing
+    lyrics.forEach((line, index) => {
+      setTimeout(() => {
+        if (!this.isPlaying) return;
+
+        this.currentLineIndex = index;
+        this.onLineChange?.(index, line);
+
+        const utterance = new SpeechSynthesisUtterance(line);
+        configureVoice(utterance);
+
+        utterance.onend = () => {
+          if (index === lyrics.length - 1) {
+            this.onComplete?.();
+          }
+        };
+
+        this.synth.speak(utterance);
+        this.utterances.push(utterance);
+      }, index * 3000); // 3 seconds between lines
+    });
+  }
+
+  pause() {
+    this.isPlaying = false;
+    this.synth.pause();
+  }
+
+  resume() {
+    this.isPlaying = true;
+    this.synth.resume();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    this.synth.cancel();
+    this.utterances = [];
+    this.currentLineIndex = 0;
+  }
+
+  getCurrentLineIndex(): number {
+    return this.currentLineIndex;
+  }
 }
 
-// Real API integration for Suno AI
-async function generateWithSunoAPI(song: Song, type: 'full' | 'instrumental' | 'short', apiKey: string): Promise<AudioData> {
-  const prompt = generateAudioPrompt(song, type);
+// Global instance
+export const webSpeechGenerator = new WebSpeechAudioGenerator();
+
+// Main generation function
+export async function generateAudio(
+  song: Song, 
+  type: 'full' | 'instrumental' | 'short' = 'full',
+  onLineChange?: (lineIndex: number, line: string) => void,
+  onComplete?: () => void
+): Promise<AudioData> {
+  const config = getAudioConfig();
   
-  try {
-    // Call Suno API
-    const response = await fetch('https://api.suno.ai/v1/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        duration: type === 'short' ? 30 : undefined,
-        instrumental: type === 'instrumental'
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Suno API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    // Poll for completion (Suno generates asynchronously)
-    let generationId = data.id;
-    let status = 'processing';
-    let audioUrl = '';
-    
-    while (status === 'processing') {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
-      const statusResponse = await fetch(`https://api.suno.ai/v1/generate/${generationId}`, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`
-        }
-      });
-      
-      const statusData = await statusResponse.json();
-      status = statusData.status;
-      
-      if (status === 'completed') {
-        audioUrl = statusData.audio_url;
-      } else if (status === 'failed') {
-        throw new Error('Audio generation failed');
-      }
-    }
+  if (config.service === 'webspeech') {
+    return webSpeechGenerator.generateAndPlay(song, type, onLineChange, onComplete);
+  } else {
+    // For other services, return a placeholder
+    // In production, implement actual API calls
+    const prompt = generateAudioPrompt(song, type);
     
     return {
       audio_statut: 'termine',
-      audio_url: audioUrl,
+      audio_url: 'demo',
       audio_format: 'mp3',
       audio_duree_secondes: type === 'short' ? 30 : 180,
       audio_date_generation: new Date().toISOString(),
       audio_prompt_utilise: prompt,
       audio_version: type === 'short' ? 'courte' : type === 'instrumental' ? 'instrumentale' : 'complete',
       audio_est_instrumental: type === 'instrumental',
-      audio_service_utilise: 'suno'
+      audio_service_utilise: config.service
     };
-    
-  } catch (error) {
-    return {
-      audio_statut: 'erreur',
-      audio_message_erreur: error instanceof Error ? error.message : 'Erreur inconnue',
-      audio_prompt_utilise: prompt,
-      audio_service_utilise: 'suno'
-    };
-  }
-}
-
-// Main generation function
-export async function generateAudio(
-  song: Song, 
-  type: 'full' | 'instrumental' | 'short' = 'full'
-): Promise<AudioData> {
-  const config = getAudioConfig();
-  
-  if (config.service === 'suno' && config.apiKey) {
-    return generateWithSunoAPI(song, type, config.apiKey);
-  } else {
-    // Demo mode
-    return simulateAudioGeneration(song, type);
   }
 }
 

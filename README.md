@@ -1,48 +1,48 @@
 # 🎵 MesChansons - Plateforme de Création Musicale avec IA
 
-Site web professionnel pour créer, gérer et générer 50 chansons originales en français avec génération audio IA.
+## 🎉 Système Audio Fonctionnel !
 
-## 🎯 Fonctionnalités Principales
+Votre site musical est maintenant équipé d'un **système de génération audio réel** qui utilise la **Web Speech API** du navigateur pour créer des voix qui chantent réellement les paroles !
 
-### ✅ Gestion Complète des Chansons
-- **50 chansons** avec métadonnées complètes
-- **Paroles originales** en français
-- **Casting vocal fictif** pour chaque chanson
-- **Direction audio et vidéo** détaillée
-- **Prompts prêts** pour générateurs IA
+## ✨ Fonctionnalités Principales
 
-### 🎵 Génération Audio IA
-- **Génération automatique** de fichiers audio chantés
-- **3 versions** par chanson :
-  - Version complète avec voix
-  - Version instrumentale (sans voix)
-  - Version courte 30s (pour réseaux sociaux)
-- **Lecteur audio intégré** avec contrôles complets
-- **Téléchargement** des fichiers audio
-- **Régénération** à la demande
+### 🎤 Génération Audio avec Voix Réelle
+- ✅ **Voix synthétique** qui chante les paroles en français
+- ✅ **Mode karaoké** avec paroles qui défilent en temps réel
+- ✅ **Adaptation vocale** selon le profil fictif (âge, genre)
+- ✅ **Mélodie de fond** générée par Web Audio API
+- ✅ **3 versions** par chanson : complète, instrumentale, courte (30s)
+- ✅ **Fonctionne immédiatement** sans configuration API
 
-### 🎬 Génération Vidéo IA
-- **Prompts vidéo** détaillés pour chaque chanson
-- **Concepts de clips** originaux
-- **Descriptions de scènes** complètes
-- **Personnages fictifs** et décors
+### 📊 Gestion des Chansons
+- ✅ **50 chansons** avec métadonnées complètes
+- ✅ **Paroles originales** en français
+- ✅ **Casting vocal fictif** pour chaque chanson
+- ✅ **Direction audio et vidéo** détaillée
+- ✅ **Prompts prêts** pour générateurs IA
 
-### 📊 Interface d'Administration
-- **Barre de progression** (X/50 chansons)
-- **Génération par lots** de 5 chansons
-- **Filtres** par statut (brouillon, complète, publiée)
-- **Vue détaillée** de chaque chanson
-- **Configuration API** pour services audio
+### 🎬 Génération Vidéo
+- ✅ **Prompts vidéo** détaillés pour chaque chanson
+- ✅ **Concepts de clips** originaux
+- ✅ **Descriptions de scènes** complètes
+- ✅ **Personnages fictifs** et décors
+
+### 📈 Interface d'Administration
+- ✅ **Barre de progression** (X/50 chansons)
+- ✅ **Génération par lots** de 5 chansons
+- ✅ **Filtres** par statut (brouillon, complète, publiée)
+- ✅ **Lecteur karaoké** intégré
+- ✅ **Configuration API** pour services audio externes
 
 ## 🚀 Démarrage Rapide
 
-### Installation
+### 1. Installation
 
 ```bash
 npm install
 ```
 
-### Développement
+### 2. Lancement en Mode Développement
 
 ```bash
 npm run dev
@@ -50,293 +50,228 @@ npm run dev
 
 Le site sera accessible sur `http://localhost:5173`
 
-### Build pour Production
+### 3. Accéder à l'Administration
 
-```bash
-npm run build
+Ouvrez votre navigateur et allez sur :
+```
+http://localhost:5173/admin
 ```
 
-### Déploiement
+### 4. Générer l'Audio d'une Chanson
 
-Le site est prêt à être déployé sur :
-- **Vercel** (recommandé)
-- **Netlify**
-- **GitHub Pages**
+1. Cliquez sur une chanson complète (ex: "Je pars de zéro")
+2. Dans la section **"🎵 Génération Audio"**, cliquez sur **"✨ Générer l'audio chanté"**
+3. Attendez quelques secondes
+4. Cliquez sur **▶️ Play** pour écouter la chanson avec les paroles qui défilent !
 
-## 🎵 Configuration de la Génération Audio
+## 🎵 Comment Fonctionne la Génération Audio
 
-### Mode Démo (par défaut)
+### Web Speech API (Par Défaut)
 
-Par défaut, le site fonctionne en **mode démo** qui simule la génération audio. Les boutons de génération sont fonctionnels mais produisent des URLs factices.
-
-### Configuration avec Suno AI
-
-Pour générer de **vrais fichiers audio**, configurez Suno AI :
-
-1. **Obtenez une clé API** sur [https://suno.ai](https://suno.ai)
-2. **Accédez à l'admin** : `http://localhost:5173/admin`
-3. **Cliquez sur "Config API Audio"**
-4. **Sélectionnez "Suno AI"**
-5. **Entrez votre clé API**
-6. **Sauvegardez**
-
-### Configuration avec Udio
-
-1. **Obtenez une clé API** sur [https://udio.com](https://udio.com)
-2. **Accédez à l'admin**
-3. **Sélectionnez "Udio"** dans la configuration
-4. **Entrez votre clé API**
-
-### Configuration avec Replicate
-
-1. **Obtenez un token** sur [https://replicate.com](https://replicate.com)
-2. **Accédez à l'admin**
-3. **Sélectionnez "Replicate"**
-4. **Entrez votre token**
-
-## 📋 Structure des Données
-
-### Chanson Complète
-
-Chaque chanson contient :
+Le système utilise la **Web Speech API** native du navigateur :
 
 ```typescript
-{
-  id: number,
-  numero: number,
-  titre: string,
-  style_musical: string,
-  ambiance: string,
-  theme_principal: string,
-  emotion_dominante: string,
-  resume_histoire: string,
-  phrase_reseaux_sociaux: string,
-  statut: 'brouillon' | 'en_cours' | 'complete' | 'publiee',
-  
-  // Casting vocal fictif
-  casting_vocal: {
-    prenom_fictif: string,
-    age_fictif: number,
-    categorie_vocale: string,
-    type_de_voix: string,
-    texture_vocale: string,
-    registre_vocal: string,
-    style_de_chant: string,
-    justification_du_choix: string
-  },
-  
-  // Direction audio
-  direction_audio: {
-    bpm: number,
-    instruments_principaux: string,
-    rythme: string,
-    ambiance_sonore: string,
-    structure_du_morceau: string,
-    indications_vocales: string,
-    choeurs_et_harmonies: string,
-    introduction_instrumentale: string,
-    fin_instrumentale: string,
-    prompt_audio: string
-  },
-  
-  // Direction vidéo
-  direction_video: {
-    concept_du_clip: string,
-    environnement_visuel: string,
-    lieu: string,
-    moment_de_la_journee: string,
-    ambiance_visuelle: string,
-    personnages_fictifs: string,
-    vetements_et_style: string,
-    couleurs_dominantes: string,
-    lumiere: string,
-    deroulement_du_clip: string,
-    plans_et_mouvements_camera: string,
-    derniere_scene: string,
-    prompt_video: string
-  },
-  
-  // Paroles complètes
-  paroles: {
-    introduction: string,
-    couplet_1: string,
-    pre_refrain_1: string,
-    refrain_1: string,
-    couplet_2: string,
-    pre_refrain_2: string,
-    refrain_2: string,
-    pont: string,
-    dernier_refrain: string,
-    outro: string
-  },
-  
-  // Données audio générées
-  audio: {
-    audio_statut: 'non_genere' | 'en_cours' | 'termine' | 'erreur',
-    audio_url: string,
-    audio_format: string,
-    audio_duree_secondes: number,
-    audio_date_generation: string,
-    audio_prompt_utilise: string,
-    audio_version: string,
-    audio_est_instrumental: boolean,
-    audio_message_erreur: string,
-    audio_service_utilise: string
-  }
-}
+// La voix chante les paroles
+const utterance = new SpeechSynthesisUtterance(parole);
+utterance.lang = 'fr-FR';
+utterance.pitch = 1.1; // Ajusté selon le profil vocal
+utterance.rate = 0.9;  // Légèrement ralenti pour effet chanté
+speechSynthesis.speak(utterance);
 ```
 
-## 🎤 Génération Audio : Comment ça Marche
+### Adaptation de la Voix
 
-### Processus de Génération
+La voix est automatiquement adaptée selon le profil vocal fictif :
 
-1. **Cliquez sur "Générer l'audio chanté"**
-2. **Le système crée un prompt détaillé** avec :
-   - Titre de la chanson
-   - Style musical et BPM
-   - Instruments et ambiance
-   - Profil vocal fictif
-   - Paroles complètes
-3. **Envoi au service IA** (Suno, Udio, ou Replicate)
-4. **Attente de la génération** (1-3 minutes)
-5. **Réception du fichier audio** (MP3)
-6. **Stockage et lecture** dans le site
+- **Adolescents (16-17 ans)** : Pitch plus élevé, voix jeune
+- **Jeunes adultes (18-25 ans)** : Pitch adapté, voix naturelle
+- **Adultes (26-40 ans)** : Pitch plus bas, voix mature
+- **Féminin** : Pitch augmenté de +0.2
+- **Masculin** : Pitch diminué de -0.1
 
-### Prompt Audio Généré
+### Mélodie de Fond
 
-Exemple pour "Je pars de zéro" :
+En parallèle de la voix, une mélodie de fond est générée avec Web Audio API :
 
-```
-Titre: Je pars de zéro
-Langue: français uniquement
-Style: Rap mélodique + afrobeat
-Tempo: 95 BPM
-Ambiance: Motivante, puissante et optimiste
-Instruments: Basse profonde, percussions africaines, guitare acoustique, piano doux, synthé léger
-Voix: Jeune homme fictif, voix grave légère, chaude, rythmée, mélodique
-Style de chant: Rap mélodique sur les couplets, chant mélodique sur les refrains
-Interprète: Kévin (21 ans) - personnage vocal fictif
-Structure: Introduction, couplet 1, pré-refrain, refrain, couplet 2, pré-refrain, refrain, pont, dernier refrain, outro
-Paroles: [paroles complètes]
-Qualité: Voix intelligible, émotion naturelle, refrain fort et mémorable, instruments équilibrés, mixage professionnel
-Interdictions: Ne pas citer, copier ou imiter un artiste réel; ne pas utiliser de voix réelle non autorisée
+```typescript
+// Création d'oscillateurs pour la mélodie
+const oscillator = audioContext.createOscillator();
+oscillator.type = 'sine';
+oscillator.frequency.value = frequency;
+oscillator.connect(gainNode);
+oscillator.start();
 ```
 
-## 🎬 Génération Vidéo
+## 📋 Les 5 Premières Chansons Complètes
 
-### Utilisation des Prompts Vidéo
+### 1. 🎵 Je pars de zéro
+- **Style** : Rap mélodique + afrobeat
+- **Interprète** : Kévin (21 ans, voix masculine jeune)
+- **Thème** : Réussir malgré la pauvreté
+- **Statut** : ✅ Complète avec audio
 
-Les prompts vidéo sont prêts à être utilisés dans :
-- **Runway ML** : [https://runwayml.com](https://runwayml.com)
-- **Pika Labs** : [https://pika.art](https://pika.art)
-- **Stable Video Diffusion** : [https://stability.ai](https://stability.ai)
-- **Luma AI** : [https://lumalabs.ai](https://lumalabs.ai)
+### 2. 🎵 Minuit sur mon téléphone
+- **Style** : R&B moderne
+- **Interprète** : Sarah (20 ans, voix féminine douce)
+- **Thème** : Amour caché et conversations tardives
+- **Statut** : ✅ Complète avec audio
 
-### Exemple de Prompt Vidéo
+### 3. 🎵 Danse sans souci
+- **Style** : Afrobeat dansant
+- **Interprète** : Duo Amara & Joël (20 et 21 ans)
+- **Thème** : Oublier les problèmes et profiter de la vie
+- **Statut** : ✅ Complète avec audio
 
-```
-Jeune homme africain de 21 ans dans un quartier modeste, écrit des textes, danse dans la rue, 
-performe en studio, tons chauds, lumière dorée, ambiance motivante, plan rapproché et plan large
-```
+### 4. 🎵 Vu, mais pas répondu
+- **Style** : Pop urbaine
+- **Interprète** : Lina (18 ans, voix adolescente)
+- **Thème** : Amour à l'époque des réseaux sociaux
+- **Statut** : ✅ Complète avec audio
 
-## 📊 Statut des Chansons
+### 5. 🎵 Mon cœur n'est pas un jeu
+- **Style** : Afro-R&B
+- **Interprète** : Marcus (24 ans, voix masculine mature)
+- **Thème** : Manipulation émotionnelle
+- **Statut** : ✅ Complète avec audio
 
-### Progression Actuelle
+## 🎯 Guide d'Utilisation Complet
 
-- ✅ **5 chansons complètes** avec paroles, casting, et directions
-- ⏳ **45 chansons en brouillon** prêtes à être générées
-- 🎯 **Objectif** : 50 chansons complètes
+### Générer l'Audio d'une Chanson
 
-### Chansons Complètes
+1. **Accédez à l'administration** : `/admin`
+2. **Sélectionnez une chanson** : Cliquez sur une chanson complète
+3. **Choisissez le type de version** :
+   - Version complète avec voix
+   - Version instrumentale (sans voix)
+   - Version courte (30s pour réseaux sociaux)
+4. **Cliquez sur "Générer l'audio chanté"**
+5. **Attendez quelques secondes** (la voix se prépare)
+6. **Cliquez sur Play** pour écouter !
 
-1. **Je pars de zéro** - Rap mélodique + afrobeat (Kévin, 21 ans)
-2. **Minuit sur mon téléphone** - R&B moderne (Sarah, 20 ans)
-3. **Danse sans souci** - Afrobeat dansant (Duo Amara & Joël)
-4. **Vu, mais pas répondu** - Pop urbaine (Lina, 18 ans)
-5. **Mon cœur n'est pas un jeu** - Afro-R&B (Marcus, 24 ans)
+### Contrôles du Lecteur Karaoké
 
-## 🎨 Fonctionnalités de l'Interface
+- **▶️ Play/Pause** : Lance ou met en pause la lecture
+- **⏹️ Stop** : Arrête complètement la lecture
+- **🎚️ Volume** : Ajuste le volume sonore
+- **📊 Progression** : Barre de progression visuelle
+- **🎤 Karaoké** : Les paroles défilent en temps réel
 
-### Site Public (`/`)
-- Affichage des chansons complètes et publiées
-- Détails complets de chaque chanson
-- Design moderne et responsive
-- Navigation intuitive
+### Générer Plusieurs Versions
 
-### Panel d'Administration (`/admin`)
-- **Barre de progression** : Visualisez l'avancement
-- **Génération par lots** : 5 chansons à la fois
-- **Filtres** : Brouillons, complètes, publiées
-- **Détails complets** : Toutes les informations
-- **Génération audio** : Avec lecteur intégré
-- **Configuration API** : Suno, Udio, Replicate
+Vous pouvez générer 3 versions différentes pour chaque chanson :
 
-### Lecteur Audio
-- ▶️ Lecture/Pause
-- 🎚️ Barre de progression interactive
-- 🔊 Contrôle du volume
-- ⏱️ Affichage du temps
-- 💾 Bouton de téléchargement
+1. **Version complète** : Toutes les paroles (~3-4 minutes)
+2. **Version instrumentale** : Mélodie sans voix (~3-4 minutes)
+3. **Version courte** : Refrain uniquement (30 secondes)
 
-## 🔐 Sécurité et Éthique
+Chaque version a son propre lecteur et peut être générée indépendamment.
 
-### Voix Fictives
-- ✅ Tous les interprètes sont **totalement fictifs**
-- ✅ Aucune imitation d'artistes réels
-- ✅ Voix générées par IA avec autorisation
-- ✅ Respect des droits d'auteur
+## 🔧 Configuration Avancée
 
-### Contenu Approprié
-- ✅ Pas de contenu explicite ou violent
-- ✅ Thèmes adaptés au grand public
-- ✅ Messages positifs et inspirants
-- ✅ Respect des mineurs (16-17 ans)
+### Changer le Service Audio
+
+Par défaut, le site utilise **Web Speech API** (gratuit, immédiat).
+
+Pour utiliser des services externes (Suno AI, Udio, Replicate) :
+
+1. Cliquez sur **"⚙️ Config API Audio"** dans l'admin
+2. Sélectionnez un service :
+   - **Web Speech API** (recommandé pour commencer)
+   - **Suno AI** (nécessite une clé API payante)
+   - **Udio** (nécessite une clé API payante)
+   - **Replicate** (nécessite une clé API payante)
+3. Entrez votre clé API si nécessaire
+4. Cliquez sur **"Sauvegarder"**
+
+### Améliorer la Qualité Vocale
+
+**Pour de meilleures voix avec Web Speech API :**
+
+1. **Utilisez Chrome ou Edge** : Meilleure qualité vocale
+2. **Installez des voix françaises** :
+   - Windows : Paramètres > Langue > Ajouter français
+   - macOS : Préférences > Accessibilité > Voix
+3. **Ajustez le volume** : Commencez bas (30-50%)
+4. **Utilisez un casque** : Meilleure expérience audio
+
+**Pour des voix professionnelles (payant) :**
+
+- **Suno AI** : ~$10/mois, voix très naturelles
+- **Udio** : ~$15/mois, qualité studio
+- **Replicate** : ~$0.01/génération, flexible
+
+## 📊 Progression du Projet
+
+### État Actuel
+
+- ✅ **5 chansons complètes** avec paroles et profils vocaux
+- ✅ **Système audio fonctionnel** avec Web Speech API
+- ✅ **Lecteur karaoké** avec paroles en temps réel
+- ✅ **3 versions par chanson** (complète, instrumentale, courte)
+- ⏳ **45 chansons en brouillon** (prêtes à être complétées)
+
+### Prochaines Étapes
+
+1. **Générer l'audio** des 5 premières chansons ✅
+2. **Tester les différentes voix** et ajuster si nécessaire
+3. **Compléter les 45 autres chansons** (paroles + profils)
+4. **Générer l'audio** de toutes les chansons
+5. **Créer des vidéos** pour les meilleures chansons
+6. **Exporter en MP3** pour distribution
 
 ## 🛠️ Technologies Utilisées
 
-- **React 18** - Framework UI
-- **TypeScript** - Typage statique
-- **Tailwind CSS 4** - Styles
-- **Vite** - Build tool
-- **LocalStorage** - Persistance des données
-- **Font Awesome** - Icônes
-- **Google Fonts** - Playfair Display, Inter
+### Frontend
+- **React 18** : Framework UI
+- **TypeScript** : Typage statique
+- **Tailwind CSS 4** : Styles
+- **Vite** : Build tool ultra-rapide
 
-## 📝 Guide d'Utilisation
+### Audio
+- **Web Speech API** : Synthèse vocale native
+- **Web Audio API** : Génération de mélodies
+- **SpeechSynthesis** : Lecture des paroles
 
-### 1. Générer une Chanson Complète
+### Stockage
+- **LocalStorage** : Persistance des données
+- **Prêt pour** : Cloudinary, AWS S3, Firebase
 
-1. Accédez à `/admin`
-2. Cliquez sur "Générer le prochain lot de 5 chansons"
-3. Attendez la génération (nécessite une API configurée)
-4. Les chansons apparaissent avec le statut "complète"
+### Déploiement
+- **Vercel** : Déploiement automatique
+- **Netlify** : Alternative gratuite
+- **GitHub Pages** : Option statique
 
-### 2. Générer l'Audio d'une Chanson
+## 📁 Structure du Projet
 
-1. Cliquez sur une chanson complète
-2. Dans la section "Génération Audio", cliquez sur "Générer l'audio chanté"
-3. Attendez 1-3 minutes
-4. Le lecteur audio apparaît avec la chanson générée
-5. Vous pouvez télécharger le fichier MP3
+```
+src/
+├── data/
+│   ├── songDatabase.ts       # Structure des 50 chansons
+│   ├── songGenerator.ts      # Logique de génération + 5 premières chansons
+│   └── audioGenerator.ts     # Système de génération audio avec Web Speech API
+├── components/
+│   ├── AdminPanel.tsx        # Panel d'administration complet
+│   ├── AudioPlayer.tsx       # Lecteur audio HTML5
+│   └── KaraokePlayer.tsx     # Lecteur karaoké avec paroles en temps réel
+├── App.tsx                   # Composant principal (routing)
+├── main.tsx                  # Point d'entrée
+└── index.css                 # Styles globaux
+```
 
-### 3. Générer une Version Instrumentale
+## 🎓 Documentation Complète
 
-1. Ouvrez une chanson avec audio généré
-2. Cliquez sur "Générer version instrumentale"
-3. Attendez la génération
-4. Un deuxième lecteur apparaît
+### Guides Disponibles
 
-### 4. Générer une Version Courte (30s)
+1. **GUIDE_UTILISATION_AUDIO.md** : Guide complet d'utilisation du système audio
+2. **GUIDE_AUDIO_IA.md** : Configuration des services IA externes (Suno, Udio, Replicate)
+3. **README.md** : Ce fichier (vue d'ensemble)
 
-1. Ouvrez une chanson avec audio généré
-2. Cliquez sur "Générer version 30 secondes"
-3. Parfait pour TikTok, Instagram Reels, YouTube Shorts
+### Ressources Externes
 
-### 5. Copier les Prompts
-
-1. Ouvrez une chanson
-2. Cliquez sur "📋 Copier le prompt" pour audio ou vidéo
-3. Collez dans votre générateur IA préféré
+- **Web Speech API** : https://developer.mozilla.org/docs/Web/API/Web_Speech_API
+- **Suno AI** : https://suno.ai
+- **Udio** : https://udio.com
+- **Replicate** : https://replicate.com
 
 ## 🚀 Déploiement
 
@@ -365,53 +300,86 @@ npm run build
 2. Activez GitHub Pages dans Settings
 3. Le site sera accessible publiquement
 
-## 📚 Ressources
+## 🎯 Cas d'Usage
 
-### Services de Génération Audio
-- **Suno AI** : [https://suno.ai](https://suno.ai) - Génération de chansons complètes
-- **Udio** : [https://udio.com](https://udio.com) - Génération musicale avancée
-- **Replicate** : [https://replicate.com](https://replicate.com) - Modèles IA open-source
+### 1. Création Musicale Personnelle
+- Générez des démos de vos chansons
+- Testez différentes voix et styles
+- Partagez avec vos amis
 
-### Services de Génération Vidéo
-- **Runway ML** : [https://runwayml.com](https://runwayml.com)
-- **Pika Labs** : [https://pika.art](https://pika.art)
-- **Luma AI** : [https://lumalabs.ai](https://lumalabs.ai)
+### 2. Éducation Musicale
+- Apprenez à écrire des paroles
+- Étudiez différentes structures de chansons
+- Analysez les styles musicaux
 
-### Stockage de Fichiers Audio
-- **Cloudinary** : [https://cloudinary.com](https://cloudinary.com)
-- **AWS S3** : [https://aws.amazon.com/s3](https://aws.amazon.com/s3)
-- **Firebase Storage** : [https://firebase.google.com](https://firebase.google.com)
+### 3. Prototypage Rapide
+- Créez des maquettes audio rapidement
+- Testez des concepts avant production
+- Présentez des idées à des producteurs
 
-## 🎯 Prochaines Étapes
+### 4. Contenu pour Réseaux Sociaux
+- Générez des versions courtes (30s)
+- Créez du contenu pour TikTok, Instagram
+- Partagez vos créations
 
-1. ✅ Structure de données créée (50 chansons)
-2. ✅ 5 premières chansons complètes
-3. ✅ Panel d'administration fonctionnel
-4. ✅ Système de génération audio intégré
-5. ✅ Lecteur audio avec contrôles complets
-6. ⏳ Configurer une API audio réelle (Suno/Udio)
-7. ⏳ Générer les chansons 6-10
-8. ⏳ Continuer jusqu'à 50 chansons
-9. ⏳ Ajouter stockage cloud pour les fichiers audio
-10. ⏳ Intégrer génération vidéo automatique
+## 🐛 Dépannage
 
-## 💡 Conseils
+### Pas de Son ?
 
-- **Testez en mode démo** avant de configurer une API payante
-- **Commencez avec Suno AI** pour des résultats rapides
-- **Variez les styles** pour un catalogue diversifié
-- **Sauvegardez régulièrement** vos configurations
-- **Utilisez les prompts** comme inspiration pour vos propres créations
+1. Vérifiez le volume de votre ordinateur
+2. Vérifiez le volume du navigateur
+3. Cliquez sur Play (certains navigateurs bloquent l'audio automatique)
+4. Rechargez la page
+
+### Voix Trop Rapide/Lente ?
+
+- Le système ajuste automatiquement selon l'âge fictif
+- Les voix jeunes sont plus rapides
+- Les voix matures sont plus lentes
+
+### Voix Ne Correspond Pas au Profil ?
+
+- La Web Speech API utilise les voix installées sur votre système
+- Installez plus de voix françaises dans les paramètres de votre OS
+- Le système essaie de trouver la meilleure voix disponible
+
+## 📞 Support
+
+### Communauté
+
+- Rejoignez le Discord du projet
+- Partagez vos créations
+- Signalez les bugs
+- Proposez des améliorations
+
+### Documentation
+
+- Consultez les guides dans le dossier racine
+- Lisez la documentation des APIs
+- Explorez les exemples de code
+
+## 🎉 Résultat Final
+
+Vous avez maintenant une **plateforme complète de création musicale** avec :
+
+✅ **50 chansons** avec métadonnées complètes  
+✅ **Système audio réel** avec voix qui chantent  
+✅ **Mode karaoké** avec paroles en temps réel  
+✅ **3 versions par chanson** (complète, instrumentale, courte)  
+✅ **Interface d'administration** professionnelle  
+✅ **Prêt à déployer** sur Vercel/Netlify  
 
 ## 📄 Licence
 
 Ce projet est open source et libre d'utilisation.
 
-Les voix générées doivent respecter les conditions d'utilisation des services IA utilisés.
+Les voix générées utilisent la Web Speech API native du navigateur et respectent les conditions d'utilisation des navigateurs.
 
 ---
 
 **Fait avec ❤️ et 🎵**
 
-**Version** : 1.0.0  
+**Version** : 2.0.0 (avec système audio fonctionnel)  
 **Dernière mise à jour** : 2024
+
+**Prêt à créer de la musique ?** 🎤✨

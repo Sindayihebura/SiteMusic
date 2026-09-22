@@ -16,6 +16,7 @@ import {
   saveAudioConfig
 } from '../data/audioGenerator';
 import AudioPlayer from './AudioPlayer';
+import KaraokePlayer from './KaraokePlayer';
 
 export default function AdminPanel() {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -24,7 +25,7 @@ export default function AdminPanel() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [generatingAudio, setGeneratingAudio] = useState<{songId: number, type: string} | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [configService, setConfigService] = useState<'suno' | 'udio' | 'replicate' | 'demo'>('demo');
+  const [configService, setConfigService] = useState<'suno' | 'udio' | 'replicate' | 'webspeech'>('webspeech');
   const [configApiKey, setConfigApiKey] = useState('');
 
   useEffect(() => {
@@ -67,8 +68,19 @@ export default function AdminPanel() {
       updateSongAudio(song.id, audioData, type);
       setSongs(initializeDatabase());
       
-      // Generate audio
-      const result = await generateAudio(song, type);
+      // Generate audio with callbacks for karaoke
+      const result = await generateAudio(
+        song, 
+        type,
+        (lineIndex, line) => {
+          // This callback is used by KaraokePlayer
+          console.log(`Line ${lineIndex}: ${line}`);
+        },
+        () => {
+          // Completion callback
+          console.log('Audio generation complete');
+        }
+      );
       
       // Save result
       updateSongAudio(song.id, result, type);
@@ -247,13 +259,13 @@ export default function AdminPanel() {
                     onChange={e => setConfigService(e.target.value as any)}
                     className="w-full bg-gray-700 rounded-lg px-4 py-2"
                   >
-                    <option value="demo">Mode Démo (simulation)</option>
+                    <option value="webspeech">Web Speech API (Voix réelle du navigateur)</option>
                     <option value="suno">Suno AI</option>
                     <option value="udio">Udio</option>
                     <option value="replicate">Replicate</option>
                   </select>
                 </div>
-                {configService !== 'demo' && (
+                {configService !== 'webspeech' && (
                   <div>
                     <label className="block text-sm font-semibold mb-2">Clé API</label>
                     <input
@@ -335,13 +347,17 @@ export default function AdminPanel() {
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'full')?.audio_url && (
+                    {getAudioStatus(selectedSong, 'full')?.audio_statut === 'termine' && (
                       <div className="mb-3">
-                        <AudioPlayer
-                          audioUrl={getAudioStatus(selectedSong, 'full')!.audio_url!}
-                          title={`${selectedSong.titre} - Version complète`}
-                          artist={selectedSong.casting_vocal?.prenom_fictif}
-                        />
+                        {getAudioStatus(selectedSong, 'full')?.audio_service_utilise === 'webspeech' ? (
+                          <KaraokePlayer song={selectedSong} type="full" />
+                        ) : (
+                          <AudioPlayer
+                            audioUrl={getAudioStatus(selectedSong, 'full')!.audio_url!}
+                            title={`${selectedSong.titre} - Version complète`}
+                            artist={selectedSong.casting_vocal?.prenom_fictif}
+                          />
+                        )}
                       </div>
                     )}
                     
@@ -381,12 +397,16 @@ export default function AdminPanel() {
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'instrumental')?.audio_url && (
+                    {getAudioStatus(selectedSong, 'instrumental')?.audio_statut === 'termine' && (
                       <div className="mb-3">
-                        <AudioPlayer
-                          audioUrl={getAudioStatus(selectedSong, 'instrumental')!.audio_url!}
-                          title={`${selectedSong.titre} - Instrumental`}
-                        />
+                        {getAudioStatus(selectedSong, 'instrumental')?.audio_service_utilise === 'webspeech' ? (
+                          <KaraokePlayer song={selectedSong} type="instrumental" />
+                        ) : (
+                          <AudioPlayer
+                            audioUrl={getAudioStatus(selectedSong, 'instrumental')!.audio_url!}
+                            title={`${selectedSong.titre} - Instrumental`}
+                          />
+                        )}
                       </div>
                     )}
                     
@@ -415,12 +435,16 @@ export default function AdminPanel() {
                       </span>
                     </div>
                     
-                    {getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' && getAudioStatus(selectedSong, 'short')?.audio_url && (
+                    {getAudioStatus(selectedSong, 'short')?.audio_statut === 'termine' && (
                       <div className="mb-3">
-                        <AudioPlayer
-                          audioUrl={getAudioStatus(selectedSong, 'short')!.audio_url!}
-                          title={`${selectedSong.titre} - 30s`}
-                        />
+                        {getAudioStatus(selectedSong, 'short')?.audio_service_utilise === 'webspeech' ? (
+                          <KaraokePlayer song={selectedSong} type="short" />
+                        ) : (
+                          <AudioPlayer
+                            audioUrl={getAudioStatus(selectedSong, 'short')!.audio_url!}
+                            title={`${selectedSong.titre} - 30s`}
+                          />
+                        )}
                       </div>
                     )}
                     
